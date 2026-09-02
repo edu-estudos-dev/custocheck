@@ -1,91 +1,100 @@
+<%- include('partials/header') %>
 <div class="container">
   <h1>Minhas Lojas</h1>
 
-  <div style="margin-bottom: 2rem;">
-    <button class="btn-primary" onclick="showNewLojaForm()">+ Adicionar Loja</button>
+  <div class="stack-actions">
+    <button type="button" class="btn-primary" id="showFormBtn">+ Adicionar Loja</button>
   </div>
 
-  <div id="newLojaForm" style="display: none; margin-bottom: 2rem;">
+  <div id="newLojaForm" class="panel" hidden>
     <div class="card">
       <h3>Nova Loja</h3>
-      <form class="form" onsubmit="createLoja(event)">
+      <form class="form" id="lojaForm">
         <div class="form-group">
-          <label>Nome</label>
+          <label for="nomeLoja">Nome</label>
           <input type="text" id="nomeLoja" required>
         </div>
         <div class="form-group">
-          <label>Cidade</label>
+          <label for="cidadeLoja">Cidade</label>
           <input type="text" id="cidadeLoja">
         </div>
-        <button type="submit" class="btn-primary">Criar Loja</button>
-        <button type="button" class="btn-secondary" onclick="hideNewLojaForm()">Cancelar</button>
+        <div class="stack-actions">
+          <button type="submit" class="btn-primary">Criar Loja</button>
+          <button type="button" class="btn-secondary" id="cancelFormBtn">Cancelar</button>
+        </div>
       </form>
     </div>
   </div>
 
-  <div id="lojasList" style="display: none;">
+  <div id="lojasList">
     <p>Carregando...</p>
   </div>
 
   <script nonce="<%= cspNonce %>">
-    window.csrfToken = '<%= safeJson(csrfToken) %>';
+    const form = document.getElementById('newLojaForm');
+    const list = document.getElementById('lojasList');
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text ?? '';
+      return div.innerHTML;
+    }
 
     async function loadLojas() {
       const res = await fetch('/api/lojas');
+      if (!res.ok) {
+        list.innerHTML = '<p>Não foi possível carregar as lojas.</p>';
+        return;
+      }
       const lojas = await res.json();
 
-      const html = lojas.length === 0
+      list.innerHTML = lojas.length === 0
         ? '<p>Nenhuma loja cadastrada</p>'
         : '<div class="grid">' + lojas.map(l => `
           <div class="card">
             <h3>${escapeHtml(l.nome)}</h3>
-            <p>${l.cidade || 'Sem cidade'}</p>
-            <p style="color: var(--ink-soft); font-size: var(--text-sm);">Criado em ${new Date(l.criado_em).toLocaleDateString('pt-BR')}</p>
+            <p>${escapeHtml(l.cidade) || 'Sem cidade'}</p>
+            <p class="meta">Criado em ${new Date(l.criado_em).toLocaleDateString('pt-BR')}</p>
           </div>
         `).join('') + '</div>';
-
-      document.getElementById('lojasList').innerHTML = html;
-      document.getElementById('lojasList').style.display = 'block';
     }
 
-    async function createLoja(e) {
-      e.preventDefault();
-      const nome = document.getElementById('nomeLoja').value;
-      const cidade = document.getElementById('cidadeLoja').value;
+    function hideForm() {
+      form.hidden = true;
+      document.getElementById('nomeLoja').value = '';
+      document.getElementById('cidadeLoja').value = '';
+    }
 
+    document.getElementById('showFormBtn').addEventListener('click', () => {
+      form.hidden = false;
+      document.getElementById('nomeLoja').focus();
+    });
+
+    document.getElementById('cancelFormBtn').addEventListener('click', hideForm);
+
+    document.getElementById('lojaForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
       const res = await fetch('/api/lojas', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-CSRF-Token': window.csrfToken,
         },
-        body: JSON.stringify({ nome, cidade }),
+        body: JSON.stringify({
+          nome: document.getElementById('nomeLoja').value,
+          cidade: document.getElementById('cidadeLoja').value,
+        }),
       });
 
       if (res.ok) {
-        hideNewLojaForm();
+        hideForm();
         loadLojas();
       } else {
         alert('Erro ao criar loja');
       }
-    }
-
-    function showNewLojaForm() {
-      document.getElementById('newLojaForm').style.display = 'block';
-    }
-
-    function hideNewLojaForm() {
-      document.getElementById('newLojaForm').style.display = 'none';
-      document.getElementById('nomeLoja').value = '';
-      document.getElementById('cidadeLoja').value = '';
-    }
-
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
+    });
 
     loadLojas();
   </script>
 </div>
+<%- include('partials/footer') %>

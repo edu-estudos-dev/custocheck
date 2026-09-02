@@ -4,21 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %> — CustoCheck</title>
+  <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
   <link rel="stylesheet" href="/css/main.css">
+  <% if (locals.pageCss) { %><link rel="stylesheet" href="/css/<%= pageCss %>.css"><% } %>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
   <script nonce="<%= cspNonce %>">
-    window.csrfToken = '<%= safeJson(csrfToken) %>';
+    window.csrfToken = <%- safeJson(csrfToken) %>;
   </script>
 </head>
-<body>
+<body class="<%= locals.bodyClass || '' %>">
   <header class="header">
     <div class="container">
       <div class="logo">
-        <svg viewBox="0 0 64 64" class="logo-icon" style="width: 32px; height: 32px;">
-          <rect width="64" height="64" rx="17" fill="currentColor"/>
-          <path d="M17 33 L27 44 L48 20" fill="none" stroke="currentColor"
+        <svg viewBox="0 0 64 64" class="logo-icon">
+          <rect width="64" height="64" rx="17" fill="#7A3FBF"/>
+          <path d="M17 33 L27 44 L48 20" fill="none" stroke="#F3CF7A"
                 stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <span class="logo-text">custo<strong>check</strong></span>
@@ -28,7 +30,9 @@
           <a href="/dashboard">Dashboard</a>
           <a href="/lojas">Lojas</a>
           <a href="/insumos">Insumos</a>
-          <form action="/auth/logout" method="post" style="display: inline;">
+          <a href="/compras">Compras</a>
+          <a href="/vendas">Vendas</a>
+          <form action="/auth/logout" method="post" class="nav-form">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button type="submit" class="btn-logout">Sair</button>
           </form>
@@ -41,11 +45,3 @@
   </header>
 
   <main class="main">
-    <%- body %>
-  </main>
-
-  <footer class="footer">
-    <p>&copy; 2026 CustoCheck. Controle de perda e CMV para açaiterias.</p>
-  </footer>
-</body>
-</html>

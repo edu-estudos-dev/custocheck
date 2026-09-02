@@ -1,34 +1,102 @@
-<section class="hero">
-  <div class="container">
-    <h1>Descubra quanto de insumo sumiu.</h1>
-    <p>Sem ficha técnica. Sem complexidade. Só a pergunta que importa.</p>
-    <div class="cta">
-      <a href="/login" class="btn-primary">Entrar</a>
-      <a href="/register" class="btn-secondary">Criar Conta</a>
+<%- include('partials/header', { bodyClass: 'page-landing', pageCss: 'landing', pageJs: 'landing' }) %>
+
+<section class="lp-hero lp-wrap">
+  <div>
+    <p class="lp-eyebrow"><i></i> perda invisível</p>
+    <h1 class="lp-title">Todo mês some<br>açaí. Você só não<br><em>sabe quanto</em>.</h1>
+    <p class="lp-sub">
+      Sem ficha técnica. Sem cadastro de receita. Três números por período —
+      e a conta que ninguém faz aparece pronta.
+    </p>
+    <div class="lp-actions">
+      <a href="/register" class="lp-btn lp-btn-gold">Começar agora <span>→</span></a>
+      <a href="/login" class="lp-btn lp-btn-ghost">Já tenho conta</a>
+    </div>
+  </div>
+
+  <aside class="lp-panel" aria-label="Exemplo de fechamento de período">
+    <div class="lp-panel-head">
+      <span>Fechamento · Loja Centro</span>
+      <span>01–31 ago</span>
+    </div>
+    <dl class="lp-ledger">
+      <div class="lp-row">
+        <dt>Comprou</dt>
+        <dd data-count="180" data-suffix=" kg" data-delay="200">180 kg</dd>
+      </div>
+      <div class="lp-row">
+        <dt>Sobrou no estoque</dt>
+        <dd data-count="24" data-suffix=" kg" data-delay="400">24 kg</dd>
+      </div>
+      <div class="lp-row">
+        <dt>Deveria ter vendido</dt>
+        <dd data-count="143.2" data-decimals="1" data-suffix=" kg" data-delay="600">143,2 kg</dd>
+      </div>
+      <div class="lp-row lp-row-total">
+        <dt>Sumiu</dt>
+        <dd data-count="1284" data-prefix="R$ " data-delay="900">R$ 1.284</dd>
+      </div>
+    </dl>
+    <div class="lp-bar"><i></i></div>
+    <p class="lp-panel-foot">CMV 34,8% · perda 12,8 kg · meta 30%</p>
+  </aside>
+</section>
+
+<section class="lp-wrap">
+  <div class="lp-strip lp-reveal">
+    <div>
+      <b>3</b>
+      <span>números por período: compra, estoque final, faturamento.</span>
+    </div>
+    <div>
+      <b>0</b>
+      <span>fichas técnicas para cadastrar. Nenhuma.</span>
+    </div>
+    <div>
+      <b>5 min</b>
+      <span>para fechar o mês e ver onde a margem foi embora.</span>
     </div>
   </div>
 </section>
 
-<section class="features">
-  <div class="container">
-    <h2>Como funciona</h2>
-    <div class="grid">
-      <div class="card">
-        <h3>1. Controle a entrada</h3>
-        <p>Registre as compras de insumos. Peso, custo, fornecedor.</p>
-      </div>
-      <div class="card">
-        <h3>2. Conte o que sobrou</h3>
-        <p>No fim do período, registre o estoque. Uma contagem simples.</p>
-      </div>
-      <div class="card">
-        <h3>3. Venda o período</h3>
-        <p>Informe o faturamento. O sistema calcula tudo.</p>
-      </div>
-      <div class="card">
-        <h3>4. Veja o resultado</h3>
-        <p>Quanto sumiu? Quanto custou? CMV% correto.</p>
-      </div>
-    </div>
+<section class="lp-steps lp-wrap">
+  <h2 class="lp-section-title lp-reveal">Quatro passos. <em>Uma resposta.</em></h2>
+  <p class="lp-section-lead lp-reveal">
+    O sistema não tenta adivinhar sua receita. Ele compara o que entrou com o que
+    sobrou e cobra a diferença do faturamento.
+  </p>
+
+  <div class="lp-steps-list">
+    <article class="lp-step lp-reveal">
+      <b>01</b>
+      <h3>Controle a entrada</h3>
+      <p>Registre as compras de insumos: peso, custo, fornecedor.</p>
+    </article>
+    <article class="lp-step lp-reveal">
+      <b>02</b>
+      <h3>Conte o que sobrou</h3>
+      <p>No fim do período, uma contagem simples do estoque.</p>
+    </article>
+    <article class="lp-step lp-reveal">
+      <b>03</b>
+      <h3>Informe a venda</h3>
+      <p>O faturamento do período. Só isso.</p>
+    </article>
+    <article class="lp-step lp-reveal">
+      <b>04</b>
+      <h3>Veja o resultado</h3>
+      <p>Quanto sumiu, quanto custou, CMV% real da loja.</p>
+    </article>
   </div>
 </section>
+
+<section class="lp-close lp-wrap">
+  <h2 class="lp-section-title lp-reveal">A perda já está acontecendo. <em>A conta, não.</em></h2>
+  <p class="lp-section-lead lp-reveal">Cadastre a primeira loja e feche o próximo período com número, não com achismo.</p>
+  <div class="lp-actions lp-reveal">
+    <a href="/register" class="lp-btn lp-btn-gold">Criar conta <span>→</span></a>
+    <a href="/login" class="lp-btn lp-btn-ghost">Entrar</a>
+  </div>
+</section>
+
+<%- include('partials/footer', { pageJs: 'landing' }) %>

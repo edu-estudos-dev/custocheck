@@ -17,6 +17,7 @@ import {
 } from './src/middleware/security.js';
 import { livez, readyz, healthz } from './src/observability/health.js';
 import { metricsEndpoint } from './src/observability/metrics.js';
+import authRoutes from './src/routes/auth.js';
 import apiRoutes from './src/routes/api.js';
 
 const app = express();
@@ -29,7 +30,6 @@ app.set('views', './src/views');
 app.use(requestContextMiddleware);
 app.use(compression());
 app.use(helmets);
-app.use(cspMiddleware);
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -70,9 +70,9 @@ app.use(
 
 app.use(globalLimiter);
 app.use(attachCspNonce);
+app.use(cspMiddleware);
 app.use(attachCsrfToken);
 app.use(disableAuthenticatedCache);
-app.use(verifyCsrfToken);
 
 app.use(express.static('public'));
 
@@ -113,29 +113,35 @@ app.get('/lojas', (req, res) => {
   if (!req.session?.userId) {
     return res.redirect('/login');
   }
-  res.render('lojas', { title: 'Lojas' });
+  res.render('lojas', { title: 'Lojas', userId: req.session.userId });
 });
 
 app.get('/insumos', (req, res) => {
   if (!req.session?.userId) {
     return res.redirect('/login');
   }
-  res.render('insumos', { title: 'Insumos' });
+  res.render('insumos', { title: 'Insumos', userId: req.session.userId });
 });
 
 app.get('/compras', (req, res) => {
   if (!req.session?.userId) {
     return res.redirect('/login');
   }
-  res.render('compras', { title: 'Compras' });
+  res.render('compras', { title: 'Compras', userId: req.session.userId });
 });
 
 app.get('/vendas', (req, res) => {
   if (!req.session?.userId) {
     return res.redirect('/login');
   }
-  res.render('vendas', { title: 'Vendas' });
+  res.render('vendas', { title: 'Vendas', userId: req.session.userId });
 });
+
+// Auth routes (sem CSRF para login/signup públicos)
+app.use('/auth', authRoutes);
+
+// CSRF protection para rotas autenticadas
+app.use(verifyCsrfToken);
 
 // API routes
 app.use('/api', apiRoutes);

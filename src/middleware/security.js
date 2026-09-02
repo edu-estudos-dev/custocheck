@@ -24,10 +24,13 @@ export const cspMiddleware = helmet.contentSecurityPolicy({
     baseUri: ["'self'"],
     scriptSrc: [(req, res) => `'nonce-${res.locals.cspNonce}'`, "'self'"],
     scriptSrcAttr: ["'none'"],
+    styleSrc: ["'self'", 'https://fonts.googleapis.com'],
+    fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+    imgSrc: ["'self'", 'data:'],
     formAction: ["'self'"],
     frameAncestors: ["'self'"],
     objectSrc: ["'none'"],
-    upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : undefined,
+    ...(process.env.NODE_ENV === 'production' && { upgradeInsecureRequests: [] }),
   },
 });
 
@@ -36,6 +39,16 @@ export const attachCsrfToken = (req, res, next) => {
     req.session.csrfToken = crypto.randomBytes(32).toString('hex');
   }
   res.locals.csrfToken = req.session.csrfToken;
+
+  // Double-submit: o cookie precisa existir para verifyCsrfToken comparar.
+  if (req.cookies?.csrf_token !== req.session.csrfToken) {
+    res.cookie('csrf_token', req.session.csrfToken, {
+      httpOnly: false,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    });
+  }
+
   next();
 };
 

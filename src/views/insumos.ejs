@@ -1,94 +1,103 @@
+<%- include('partials/header') %>
 <div class="container">
   <h1>Insumos</h1>
 
-  <div style="margin-bottom: 2rem;">
-    <button class="btn-primary" onclick="showNewInsumoForm()">+ Adicionar Insumo</button>
+  <div class="stack-actions">
+    <button type="button" class="btn-primary" id="showFormBtn">+ Adicionar Insumo</button>
   </div>
 
-  <div id="newInsumoForm" style="display: none; margin-bottom: 2rem;">
+  <div id="newInsumoForm" class="panel" hidden>
     <div class="card">
       <h3>Novo Insumo</h3>
-      <form class="form" onsubmit="createInsumo(event)">
+      <form class="form" id="insumoForm">
         <div class="form-group">
-          <label>Nome</label>
+          <label for="nomeInsumo">Nome</label>
           <input type="text" id="nomeInsumo" required>
         </div>
         <div class="form-group">
-          <label>Unidade Base</label>
+          <label for="unidadeInsumo">Unidade Base</label>
           <select id="unidadeInsumo" required>
             <option value="g">Grama (g)</option>
             <option value="ml">Mililitro (ml)</option>
             <option value="un">Unidade (un)</option>
           </select>
         </div>
-        <button type="submit" class="btn-primary">Criar Insumo</button>
-        <button type="button" class="btn-secondary" onclick="hideNewInsumoForm()">Cancelar</button>
+        <div class="stack-actions">
+          <button type="submit" class="btn-primary">Criar Insumo</button>
+          <button type="button" class="btn-secondary" id="cancelFormBtn">Cancelar</button>
+        </div>
       </form>
     </div>
   </div>
 
-  <div id="insumosList" style="display: none;">
+  <div id="insumosList">
     <p>Carregando...</p>
   </div>
 
   <script nonce="<%= cspNonce %>">
-    window.csrfToken = '<%= safeJson(csrfToken) %>';
+    const form = document.getElementById('newInsumoForm');
+    const list = document.getElementById('insumosList');
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text ?? '';
+      return div.innerHTML;
+    }
 
     async function loadInsumos() {
       const res = await fetch('/api/insumos');
+      if (!res.ok) {
+        list.innerHTML = '<p>Não foi possível carregar os insumos.</p>';
+        return;
+      }
       const insumos = await res.json();
 
-      const html = insumos.length === 0
+      list.innerHTML = insumos.length === 0
         ? '<p>Nenhum insumo cadastrado</p>'
         : '<div class="grid">' + insumos.map(i => `
           <div class="card">
             <h3>${escapeHtml(i.nome)}</h3>
-            <p>Unidade: <strong>${i.unidade_base}</strong></p>
-            <p style="color: var(--ink-soft); font-size: var(--text-sm);">Criado em ${new Date(i.criado_em).toLocaleDateString('pt-BR')}</p>
+            <p>Unidade: <strong>${escapeHtml(i.unidade_base)}</strong></p>
+            <p class="meta">Criado em ${new Date(i.criado_em).toLocaleDateString('pt-BR')}</p>
           </div>
         `).join('') + '</div>';
-
-      document.getElementById('insumosList').innerHTML = html;
-      document.getElementById('insumosList').style.display = 'block';
     }
 
-    async function createInsumo(e) {
-      e.preventDefault();
-      const nome = document.getElementById('nomeInsumo').value;
-      const unidadeBase = document.getElementById('unidadeInsumo').value;
+    function hideForm() {
+      form.hidden = true;
+      document.getElementById('nomeInsumo').value = '';
+    }
 
+    document.getElementById('showFormBtn').addEventListener('click', () => {
+      form.hidden = false;
+      document.getElementById('nomeInsumo').focus();
+    });
+
+    document.getElementById('cancelFormBtn').addEventListener('click', hideForm);
+
+    document.getElementById('insumoForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
       const res = await fetch('/api/insumos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-CSRF-Token': window.csrfToken,
         },
-        body: JSON.stringify({ nome, unidadeBase }),
+        body: JSON.stringify({
+          nome: document.getElementById('nomeInsumo').value,
+          unidadeBase: document.getElementById('unidadeInsumo').value,
+        }),
       });
 
       if (res.ok) {
-        hideNewInsumoForm();
+        hideForm();
         loadInsumos();
       } else {
         alert('Erro ao criar insumo');
       }
-    }
-
-    function showNewInsumoForm() {
-      document.getElementById('newInsumoForm').style.display = 'block';
-    }
-
-    function hideNewInsumoForm() {
-      document.getElementById('newInsumoForm').style.display = 'none';
-      document.getElementById('nomeInsumo').value = '';
-    }
-
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
+    });
 
     loadInsumos();
   </script>
 </div>
+<%- include('partials/footer') %>

@@ -1,104 +1,132 @@
+<%- include('partials/header') %>
 <div class="container">
   <h1>Vendas do Período</h1>
 
-  <div style="margin-bottom: 2rem;">
-    <button class="btn-primary" onclick="showNewVendaForm()">+ Registrar Venda</button>
+  <div class="stack-actions">
+    <div class="form-group">
+      <label for="lojaId">Loja</label>
+      <select id="lojaId" required></select>
+    </div>
+    <button type="button" class="btn-primary" id="showFormBtn">+ Registrar Venda</button>
   </div>
 
-  <div id="newVendaForm" style="display: none; margin-bottom: 2rem;">
+  <div id="newVendaForm" class="panel" hidden>
     <div class="card">
       <h3>Registrar Venda do Período</h3>
-      <form class="form" onsubmit="createVenda(event)">
+      <form class="form" id="vendaForm">
         <div class="form-group">
-          <label>Loja</label>
-          <select id="lojaId" required></select>
-        </div>
-        <div class="form-group">
-          <label>Data Início</label>
+          <label for="dataInicio">Data Início</label>
           <input type="date" id="dataInicio" required>
         </div>
         <div class="form-group">
-          <label>Data Fim</label>
+          <label for="dataFim">Data Fim</label>
           <input type="date" id="dataFim" required>
         </div>
         <div class="form-group">
-          <label>Faturamento (R$)</label>
+          <label for="faturamento">Faturamento (R$)</label>
           <input type="number" id="faturamento" step="0.01" required>
         </div>
-        <button type="submit" class="btn-primary">Registrar Venda</button>
-        <button type="button" class="btn-secondary" onclick="hideNewVendaForm()">Cancelar</button>
+        <div class="stack-actions">
+          <button type="submit" class="btn-primary">Registrar Venda</button>
+          <button type="button" class="btn-secondary" id="cancelFormBtn">Cancelar</button>
+        </div>
       </form>
     </div>
   </div>
 
-  <div id="vendasList" style="display: none;">
+  <div id="vendasList">
     <p>Carregando...</p>
   </div>
 
   <script nonce="<%= cspNonce %>">
-    window.csrfToken = '<%= safeJson(csrfToken) %>';
+    const lojaSelect = document.getElementById('lojaId');
+    const form = document.getElementById('newVendaForm');
+    const list = document.getElementById('vendasList');
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text ?? '';
+      return div.innerHTML;
+    }
 
     async function loadLojas() {
       const res = await fetch('/api/lojas');
+      if (!res.ok) return;
       const lojas = await res.json();
-      const select = document.getElementById('lojaId');
-      select.innerHTML = lojas.map(l => `<option value="${l.id}">${escapeHtml(l.nome)}</option>`).join('');
+      lojaSelect.innerHTML = lojas
+        .map((l) => `<option value="${escapeHtml(l.id)}">${escapeHtml(l.nome)}</option>`)
+        .join('');
     }
 
-    async function createVenda(e) {
-      e.preventDefault();
-      const lojaId = document.getElementById('lojaId').value;
-      const dataInicio = document.getElementById('dataInicio').value;
-      const dataFim = document.getElementById('dataFim').value;
-      const faturamento = parseFloat(document.getElementById('faturamento').value);
+    async function loadVendas() {
+      const lojaId = lojaSelect.value;
+      if (!lojaId) {
+        list.innerHTML = '<p>Cadastre uma loja para registrar vendas.</p>';
+        return;
+      }
 
+      const res = await fetch(`/api/vendas?lojaId=${encodeURIComponent(lojaId)}`);
+      if (!res.ok) {
+        list.innerHTML = '<p>Não foi possível carregar as vendas.</p>';
+        return;
+      }
+      const vendas = await res.json();
+
+      list.innerHTML = vendas.length === 0
+        ? '<p>Nenhuma venda registrada</p>'
+        : `<div class="table-wrap"><table class="table">
+            <thead><tr><th>Período</th><th class="num">Faturamento</th></tr></thead>
+            <tbody>${vendas.map((v) => `
+              <tr>
+                <td>${new Date(v.data_inicio).toLocaleDateString('pt-BR')} — ${new Date(v.data_fim).toLocaleDateString('pt-BR')}</td>
+                <td class="num">R$ ${parseFloat(v.faturamento).toFixed(2)}</td>
+              </tr>`).join('')}
+            </tbody></table></div>`;
+    }
+
+    function hideForm() {
+      form.hidden = true;
+      document.getElementById('vendaForm').reset();
+    }
+
+    document.getElementById('showFormBtn').addEventListener('click', () => {
+      form.hidden = false;
+      document.getElementById('dataInicio').focus();
+    });
+
+    document.getElementById('cancelFormBtn').addEventListener('click', hideForm);
+
+    lojaSelect.addEventListener('change', loadVendas);
+
+    document.getElementById('vendaForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
       const res = await fetch('/api/vendas', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-CSRF-Token': window.csrfToken,
         },
-        body: JSON.stringify({ lojaId, dataInicio, dataFim, faturamento }),
+        body: JSON.stringify({
+          lojaId: lojaSelect.value,
+          dataInicio: document.getElementById('dataInicio').value,
+          dataFim: document.getElementById('dataFim').value,
+          faturamento: parseFloat(document.getElementById('faturamento').value),
+        }),
       });
 
       if (res.ok) {
-        hideNewVendaForm();
+        hideForm();
         loadVendas();
       } else {
-        const err = await res.json();
-        alert('Erro: ' + (err.error || 'Desconhecido'));
+        const err = await res.json().catch(() => ({}));
+        alert('Erro: ' + (err.error || res.status));
       }
-    }
+    });
 
-    async function loadVendas() {
-      const lojaId = document.getElementById('lojaId').value || null;
-      if (!lojaId) return;
-
-      const res = await fetch(`/api/vendas?lojaId=${lojaId}`);
-      const vendas = await res.json();
-
-      const html = vendas.length === 0
-        ? '<p>Nenhuma venda registrada</p>'
-        : '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse;"><tr><th style="text-align: left; padding: 8px; border-bottom: 1px solid var(--border);">Período</th><th style="text-align: right; padding: 8px; border-bottom: 1px solid var(--border);">Faturamento</th></tr>' + vendas.map(v => `<tr><td style="padding: 8px; border-bottom: 1px solid var(--border);">${new Date(v.data_inicio).toLocaleDateString('pt-BR')} - ${new Date(v.data_fim).toLocaleDateString('pt-BR')}</td><td style="padding: 8px; border-bottom: 1px solid var(--border); text-align: right; font-variant-numeric: tabular-nums;">R$ ${parseFloat(v.faturamento).toFixed(2)}</td></tr>`).join('') + '</table></div>';
-
-      document.getElementById('vendasList').innerHTML = html;
-      document.getElementById('vendasList').style.display = 'block';
-    }
-
-    function showNewVendaForm() {
-      document.getElementById('newVendaForm').style.display = 'block';
-    }
-
-    function hideNewVendaForm() {
-      document.getElementById('newVendaForm').style.display = 'none';
-    }
-
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    loadLojas();
+    (async () => {
+      await loadLojas();
+      loadVendas();
+    })();
   </script>
 </div>
+<%- include('partials/footer') %>
