@@ -17,6 +17,7 @@ import {
 } from './src/middleware/security.js';
 import { livez, readyz, healthz } from './src/observability/health.js';
 import { metricsEndpoint } from './src/observability/metrics.js';
+import apiRoutes from './src/routes/api.js';
 
 const app = express();
 
@@ -107,6 +108,37 @@ app.get('/dashboard', (req, res) => {
   }
   res.render('dashboard', { title: 'Dashboard', userId: req.session.userId });
 });
+
+app.get('/lojas', (req, res) => {
+  if (!req.session?.userId) {
+    return res.redirect('/login');
+  }
+  res.render('lojas', { title: 'Lojas' });
+});
+
+app.get('/insumos', (req, res) => {
+  if (!req.session?.userId) {
+    return res.redirect('/login');
+  }
+  res.render('insumos', { title: 'Insumos' });
+});
+
+app.get('/compras', (req, res) => {
+  if (!req.session?.userId) {
+    return res.redirect('/login');
+  }
+  res.render('compras', { title: 'Compras' });
+});
+
+app.get('/vendas', (req, res) => {
+  if (!req.session?.userId) {
+    return res.redirect('/login');
+  }
+  res.render('vendas', { title: 'Vendas' });
+});
+
+// API routes
+app.use('/api', apiRoutes);
 
 app.use((req, res) => {
   res.status(404).render('404', { title: 'Não encontrado' });
