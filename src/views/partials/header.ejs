@@ -17,14 +17,14 @@
 <body class="<%= locals.bodyClass || '' %>">
   <header class="header">
     <div class="container">
-      <div class="logo">
+      <a href="/" class="logo">
         <svg viewBox="0 0 64 64" class="logo-icon">
           <rect width="64" height="64" rx="17" fill="#7A3FBF"/>
           <path d="M17 33 L27 44 L48 20" fill="none" stroke="#F3CF7A"
                 stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <span class="logo-text">custo<strong>check</strong></span>
-      </div>
+      </a>
       <nav class="nav">
         <% if (locals.userId) { %>
           <a href="/dashboard">Dashboard</a>
