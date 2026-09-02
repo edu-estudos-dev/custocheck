@@ -1,27 +1,59 @@
 <%- include('partials/header') %>
 <div class="container">
-  <h1>Dashboard</h1>
+  <div class="dashboard-header">
+    <h1>Dashboard</h1>
+    <p>Escolha onde quer trabalhar agora.</p>
+  </div>
 
   <div class="dashboard-grid">
-    <section class="card">
+    <section class="card dashboard-card">
+      <div class="dashboard-card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 10 12 4l8 6"/>
+          <path d="M5 9v10h14V9"/>
+          <path d="M10 19v-5h4v5"/>
+        </svg>
+      </div>
       <h2>Minhas Lojas</h2>
       <p>Gerencie as filiais e seus registros de perda.</p>
       <a href="/lojas" class="btn-primary">Ver Lojas</a>
     </section>
 
-    <section class="card">
+    <section class="card dashboard-card">
+      <div class="dashboard-card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 8 12 3 3 8l9 5 9-5Z"/>
+          <path d="M3 8v8l9 5 9-5V8"/>
+          <path d="M12 13v8"/>
+        </svg>
+      </div>
       <h2>Insumos</h2>
       <p>Cadastre os produtos e embalagens.</p>
       <a href="/insumos" class="btn-primary">Ver Insumos</a>
     </section>
 
-    <section class="card">
+    <section class="card dashboard-card">
+      <div class="dashboard-card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 3h12l1 5H5l1-5Z"/>
+          <path d="M5 8h14l-1.2 11.1a2 2 0 0 1-2 1.9H8.2a2 2 0 0 1-2-1.9L5 8Z"/>
+          <path d="M9 12h6"/>
+        </svg>
+      </div>
       <h2>Compras</h2>
       <p>Registre entrada de insumos.</p>
       <a href="/compras" class="btn-primary">Lançar Compra</a>
     </section>
 
-    <section class="card">
+    <section class="card dashboard-card">
+      <div class="dashboard-card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 20V10"/>
+          <path d="M10 20V4"/>
+          <path d="M16 20v-7"/>
+          <path d="M3 20h18"/>
+        </svg>
+      </div>
       <h2>Vendas</h2>
       <p>Registre faturamento dos períodos.</p>
       <a href="/vendas" class="btn-primary">Registrar Venda</a>
