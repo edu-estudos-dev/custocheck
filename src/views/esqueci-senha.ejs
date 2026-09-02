@@ -1,0 +1,32 @@
+<%- include('partials/header', { bodyClass: 'page-landing', pageCss: 'landing', pageJs: 'auth' }) %>
+
+<div class="lp-auth-shell">
+  <div class="lp-auth-card">
+    <div class="lp-auth-icon">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="10" width="16" height="10" rx="2" fill="#12061C"/>
+        <path d="M7 10V7a5 5 0 0 1 10 0v3" stroke="#F3CF7A" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <h1>Esqueci minha senha</h1>
+    <p class="lp-auth-lead">Digite o email da conta. Se ele existir, mandamos um link pra criar uma senha nova.</p>
+
+    <div class="lp-auth-msg lp-auth-msg-error" id="formError"></div>
+    <div class="lp-auth-msg lp-auth-msg-ok" id="formSuccess"></div>
+
+    <form class="form" id="forgotForm" novalidate>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" autocomplete="email" required>
+      </div>
+
+      <button type="submit" class="btn-primary btn-block" id="submitBtn">Enviar link</button>
+    </form>
+
+    <div class="lp-auth-links">
+      <a href="/login">Voltar para o login</a>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer', { pageJs: 'auth' }) %>

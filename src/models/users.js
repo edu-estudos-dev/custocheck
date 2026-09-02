@@ -42,6 +42,11 @@ export const verifyPassword = async (plainPassword, hashPassword) => {
   return bcrypt.compare(plainPassword, hashPassword);
 };
 
+export const updatePasswordById = async (userId, novaSenha) => {
+  const senhaHash = await bcrypt.hash(novaSenha, 10);
+  await pool.query('UPDATE usuarios SET senha_hash = $1 WHERE id = $2', [senhaHash, userId]);
+};
+
 export const listUsersByContaId = async (contaId) => {
   const result = await pool.query(
     `SELECT id, conta_id, nome, email, papel, ativo, criado_em

@@ -1,30 +1,41 @@
-<%- include('partials/header') %>
-<div class="auth-container">
-  <div class="auth-card">
-    <h1>Criar Conta</h1>
+<%- include('partials/header', { bodyClass: 'page-landing', pageCss: 'landing', pageJs: 'auth' }) %>
 
-    <form method="post" action="/auth/signup" class="form">
+<div class="lp-auth-shell">
+  <div class="lp-auth-card">
+    <div class="lp-auth-icon">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2 4 5v6c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V5l-8-3Z" fill="#12061C"/>
+        <path d="M8.5 12.2 11 14.7l4.5-5" stroke="#F3CF7A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h1>Criar conta</h1>
+    <p class="lp-auth-lead">Sem cartão, sem cobrança. Comece a medir agora.</p>
+
+    <div class="lp-auth-msg lp-auth-msg-error" id="formError"></div>
+
+    <form class="form" id="registerForm" novalidate>
       <div class="form-group">
-        <label for="name">Seu Nome</label>
-        <input type="text" id="name" name="nome" required>
+        <label for="name">Seu nome</label>
+        <input type="text" id="name" name="nome" autocomplete="name" required>
       </div>
 
       <div class="form-group">
         <label for="email">Email</label>
-        <input type="email" id="email" name="email" required>
+        <input type="email" id="email" name="email" autocomplete="email" required>
       </div>
 
       <div class="form-group">
-        <label for="password">Senha (min 8 chars, 1 MAIÚSCULA, 1 minúscula, 1 número)</label>
-        <input type="password" id="password" name="senha" required>
+        <label for="password">Senha (mín. 8 chars, 1 maiúscula, 1 minúscula, 1 número)</label>
+        <input type="password" id="password" name="senha" autocomplete="new-password" required>
       </div>
 
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-
-      <button type="submit" class="btn-primary btn-block">Criar Conta</button>
+      <button type="submit" class="btn-primary btn-block" id="submitBtn">Criar conta</button>
     </form>
 
-    <p class="auth-link">Já tem conta? <a href="/login">Entrar</a></p>
+    <div class="lp-auth-links">
+      <span>Já tem conta? <a href="/login" class="lp-auth-primary-link">Entrar</a></span>
+    </div>
   </div>
 </div>
-<%- include('partials/footer') %>
+
+<%- include('partials/footer', { pageJs: 'auth' }) %>

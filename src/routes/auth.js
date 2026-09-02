@@ -1,8 +1,10 @@
 import express from 'express';
 import * as userModel from '../models/users.js';
+import * as resetModel from '../models/passwordReset.js';
 import { sanitize, validateEmail, validatePassword } from '../utilities/validation.js';
 import { withTransaction } from '../config/database.js';
-import { loginLimiter, signupLimiter } from '../middleware/security.js';
+import { loginLimiter, signupLimiter, passwordResetLimiter } from '../middleware/security.js';
+import { logger } from '../observability/logger.js';
 import bcrypt from 'bcrypt';
 
 const router = express.Router();
@@ -95,6 +97,67 @@ router.post('/signup', signupLimiter, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Signup falhou' });
+  }
+});
+
+router.post('/esqueci-senha', passwordResetLimiter, async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Informe seu email' });
+    }
+
+    const emailSafe = sanitize(email).toLowerCase();
+    const user = await userModel.getUserByEmail(emailSafe);
+
+    // Resposta sempre igual, exista ou não a conta — evita enumeração de email.
+    const resposta = {
+      message: 'Se esse email existir na nossa base, enviamos um link de redefinição.',
+    };
+
+    if (user && user.ativo) {
+      const token = await resetModel.createResetToken(user.id);
+      const resetUrl = `${req.protocol}://${req.get('host')}/resetar-senha?token=${token}`;
+
+      // Sem provedor de email configurado ainda: registra no log e,
+      // fora de produção, devolve o link direto na resposta pra dar
+      // pra testar o fluxo sem SMTP.
+      logger.info({ userId: user.id, resetUrl }, 'Link de redefinição de senha gerado');
+      if (process.env.NODE_ENV !== 'production') {
+        resposta.devResetUrl = resetUrl;
+      }
+    }
+
+    res.json(resposta);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Não foi possível processar o pedido' });
+  }
+});
+
+router.post('/resetar-senha', passwordResetLimiter, async (req, res) => {
+  try {
+    const { token, senha } = req.body;
+
+    if (!token || !senha) {
+      return res.status(400).json({ error: 'Token e nova senha obrigatórios' });
+    }
+
+    if (!validatePassword(senha)) {
+      return res.status(400).json({ error: 'Senha fraca' });
+    }
+
+    const usuarioId = await resetModel.consumeResetToken(token);
+    if (!usuarioId) {
+      return res.status(400).json({ error: 'Link inválido ou expirado' });
+    }
+
+    await userModel.updatePasswordById(usuarioId, senha);
+
+    res.json({ message: 'Senha atualizada com sucesso' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Não foi possível redefinir a senha' });
   }
 });
 

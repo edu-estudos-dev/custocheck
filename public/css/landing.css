@@ -682,10 +682,168 @@
   .page-landing .nav a[href="/precos"] { display: none; }
 }
 
+/* ---------- Autenticação (login, cadastro, recuperação) ---------- */
+.lp-auth-shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 200px);
+  padding: clamp(32px, 6vh, 64px) var(--space-4);
+}
+
+.lp-auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: linear-gradient(160deg, rgba(44, 17, 64, 0.92), rgba(18, 6, 28, 0.92));
+  border: 1px solid var(--lp-line);
+  border-radius: 22px;
+  padding: clamp(32px, 5vw, 48px);
+  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.85);
+  opacity: 0;
+  transform: translateY(18px);
+  animation: lp-auth-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+}
+
+@keyframes lp-auth-in { to { opacity: 1; transform: none; } }
+
+.lp-auth-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--lp-gold), var(--lp-gold-deep));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-6);
+  box-shadow: 0 12px 24px -10px rgba(243, 207, 122, 0.5);
+}
+
+.lp-auth-icon svg { width: 22px; height: 22px; }
+
+.lp-auth-card h1 {
+  font-family: var(--lp-display);
+  font-weight: 600;
+  font-size: 1.7rem;
+  color: var(--lp-text);
+  margin-bottom: var(--space-2);
+  letter-spacing: -0.01em;
+}
+
+.lp-auth-lead {
+  color: var(--lp-mute);
+  font-size: 0.92rem;
+  margin-bottom: var(--space-8);
+  max-width: 40ch;
+}
+
+.lp-auth-card .form {
+  gap: var(--space-5);
+}
+
+.lp-auth-card .form-group label {
+  font-family: var(--lp-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--lp-mute);
+  font-weight: 500;
+}
+
+.lp-auth-card .form-group input {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--lp-line);
+  color: var(--lp-text);
+  border-radius: 12px;
+  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+}
+
+.lp-auth-card .form-group input::placeholder { color: rgba(180, 159, 196, 0.5); }
+
+.lp-auth-card .form-group input:focus {
+  outline: none;
+  border-color: var(--lp-gold);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 4px rgba(243, 207, 122, 0.12);
+}
+
+.lp-auth-card .btn-block {
+  border-radius: 999px;
+  min-height: 52px;
+  font-weight: 700;
+  background: var(--lp-gold);
+  color: var(--lp-void);
+  border: none;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s, opacity 0.2s;
+  box-shadow: 0 10px 30px -12px rgba(243, 207, 122, 0.7);
+}
+
+.lp-auth-card .btn-block:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px -14px rgba(243, 207, 122, 0.85);
+}
+
+.lp-auth-card .btn-block:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.lp-auth-links {
+  text-align: center;
+  margin-top: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.lp-auth-links a {
+  color: var(--lp-mute);
+  font-size: 0.88rem;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.lp-auth-links a:hover { color: var(--lp-gold); }
+
+.lp-auth-links .lp-auth-primary-link {
+  color: var(--lp-gold);
+  font-weight: 600;
+}
+
+.lp-auth-msg {
+  border-radius: 12px;
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.85rem;
+  margin-bottom: var(--space-6);
+  border: 1px solid transparent;
+  display: none;
+}
+
+.lp-auth-msg.is-visible { display: block; }
+
+.lp-auth-msg-error {
+  background: rgba(255, 122, 92, 0.1);
+  border-color: rgba(255, 122, 92, 0.3);
+  color: #FFB4A2;
+}
+
+.lp-auth-msg-ok {
+  background: rgba(87, 201, 139, 0.1);
+  border-color: rgba(87, 201, 139, 0.3);
+  color: #8FE3B4;
+}
+
+.lp-auth-dev-link {
+  margin-top: var(--space-2);
+  font-family: var(--lp-mono);
+  font-size: 0.75rem;
+  word-break: break-all;
+  color: var(--lp-gold);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .page-landing::before { animation: none; }
   .lp-reveal { opacity: 1; transform: none; }
   .lp-row { opacity: 1; transform: none; }
   .lp-bar i { width: 76%; }
   .page-landing .lp-title em::after { transform: scaleX(1); }
+  .lp-auth-card { opacity: 1; transform: none; animation: none; }
 }

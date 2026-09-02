@@ -99,6 +99,20 @@ app.get('/login', (req, res) => {
   res.render('login', { title: 'Entrar' });
 });
 
+app.get('/esqueci-senha', (req, res) => {
+  if (req.session?.userId) {
+    return res.redirect('/dashboard');
+  }
+  res.render('esqueci-senha', { title: 'Esqueci minha senha' });
+});
+
+app.get('/resetar-senha', (req, res) => {
+  if (req.session?.userId) {
+    return res.redirect('/dashboard');
+  }
+  res.render('resetar-senha', { title: 'Redefinir senha', token: req.query.token || '' });
+});
+
 app.get('/register', (req, res) => {
   if (req.session?.userId) {
     return res.redirect('/dashboard');

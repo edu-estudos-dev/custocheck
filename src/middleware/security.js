@@ -130,6 +130,15 @@ export const signupLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+export const passwordResetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  keyGenerator: (req) => req.ip || req.connection.remoteAddress,
+  message: 'Too many password reset attempts, please try again in 15 minutes',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 export const expensiveWriteLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 60,

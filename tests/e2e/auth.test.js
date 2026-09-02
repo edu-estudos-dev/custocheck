@@ -8,17 +8,30 @@ test.describe('Auth Flow', () => {
 
   test('access login page', async ({ page }) => {
     await page.goto('/login');
-    await expect(page.locator('h1')).toContainText('Entrar');
+    await expect(page.locator('h1')).toContainText('Bem-vindo de volta');
     await expect(page.locator('input[name="email"]')).toBeVisible();
     await expect(page.locator('input[name="senha"]')).toBeVisible();
   });
 
   test('access register page', async ({ page }) => {
     await page.goto('/register');
-    await expect(page.locator('h1')).toContainText('Criar Conta');
+    await expect(page.locator('h1')).toContainText('Criar conta');
     await expect(page.locator('input[name="nome"]')).toBeVisible();
     await expect(page.locator('input[name="email"]')).toBeVisible();
     await expect(page.locator('input[name="senha"]')).toBeVisible();
+  });
+
+  test('access forgot password page', async ({ page }) => {
+    await page.goto('/esqueci-senha');
+    await expect(page.locator('h1')).toContainText('Esqueci minha senha');
+    await expect(page.locator('input[name="email"]')).toBeVisible();
+  });
+
+  test('reset password page without token shows invalid link message', async ({ page }) => {
+    await page.goto('/resetar-senha');
+    await expect(page.locator('h1')).toContainText('Nova senha');
+    await expect(page.getByText('Link inválido.')).toBeVisible();
+    await expect(page.locator('#resetForm')).toHaveCount(0);
   });
 
   test('register form validation', async ({ page }) => {
