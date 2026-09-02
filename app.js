@@ -88,6 +88,10 @@ app.get('/', (req, res) => {
   res.render('index', { title: 'CustoCheck' });
 });
 
+app.get('/precos', (req, res) => {
+  res.render('precos', { title: 'Preços', userId: req.session?.userId });
+});
+
 app.get('/login', (req, res) => {
   if (req.session?.userId) {
     return res.redirect('/dashboard');

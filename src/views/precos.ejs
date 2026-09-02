@@ -1,0 +1,79 @@
+<%- include('partials/header', { bodyClass: 'page-landing', pageCss: 'landing', pageJs: 'landing' }) %>
+
+<section class="lp-page-hero lp-wrap">
+  <p class="lp-eyebrow lp-reveal"><i></i> preço simples</p>
+  <h1 class="lp-title lp-reveal">Um plano. <em>Sem letra miúda.</em></h1>
+  <p class="lp-sub lp-reveal">
+    Ainda estamos fechando o valor final — early adopters travam o preço de
+    lançamento pra sempre. Entre na lista e garanta o seu.
+  </p>
+</section>
+
+<section class="lp-plans lp-wrap">
+  <div class="lp-plan-grid">
+    <article class="lp-plan lp-reveal">
+      <p class="lp-plan-tag">Lançamento</p>
+      <h2 class="lp-plan-name">CustoCheck</h2>
+      <p class="lp-plan-desc">Lojas, insumos, compras, vendas e CMV sem limite artificial de uso.</p>
+      <p class="lp-plan-price"><b>R$ —</b><span>/mês por loja</span></p>
+      <ul class="lp-plan-features">
+        <li>Lojas ilimitadas na mesma conta</li>
+        <li>Insumos e embalagens sem limite</li>
+        <li>Fechamento de período com CMV automático</li>
+        <li>Usuários ilimitados por conta</li>
+      </ul>
+      <a href="/register" class="lp-btn lp-btn-gold">Entrar na lista <span>→</span></a>
+    </article>
+
+    <article class="lp-plan lp-plan-featured lp-reveal">
+      <p class="lp-plan-tag">Preço de fundador</p>
+      <h2 class="lp-plan-name">Primeiras 50 contas</h2>
+      <p class="lp-plan-desc">Quem entra agora trava esse preço pro resto da vida da conta, mesmo depois do lançamento oficial.</p>
+      <p class="lp-plan-price"><b>R$ —</b><span>/mês, vitalício</span></p>
+      <ul class="lp-plan-features">
+        <li>Tudo do plano padrão</li>
+        <li>Preço nunca reajustado enquanto a conta ativa</li>
+        <li>Prioridade em pedidos de recurso novo</li>
+        <li>Suporte direto com quem constrói o produto</li>
+      </ul>
+      <a href="/register" class="lp-btn lp-btn-gold">Garantir vaga <span>→</span></a>
+    </article>
+  </div>
+
+  <p class="lp-plan-note">Preço final ainda em definição — cadastre-se sem cartão, sem cobrança.</p>
+</section>
+
+<section class="lp-faq lp-wrap">
+  <h2 class="lp-section-title lp-reveal">Perguntas <em>diretas</em></h2>
+  <p class="lp-section-lead lp-reveal">Se não está aqui, é porque ainda não perguntaram.</p>
+
+  <div class="lp-faq-list lp-reveal">
+    <details class="lp-faq-item">
+      <summary>Preciso cadastrar ficha técnica de receita?</summary>
+      <p>Não. O CustoCheck compara o que entrou (compra) com o que sobrou (contagem) e cobra a diferença do faturamento. Zero cadastro de receita.</p>
+    </details>
+    <details class="lp-faq-item">
+      <summary>Funciona com mais de uma loja?</summary>
+      <p>Sim. Uma conta pode ter várias lojas, cada uma com seu próprio controle de estoque, compras e vendas — sem misturar os números.</p>
+    </details>
+    <details class="lp-faq-item">
+      <summary>Tem período de teste?</summary>
+      <p>O cadastro não pede cartão. Você usa o sistema antes de decidir qualquer coisa sobre pagamento.</p>
+    </details>
+    <details class="lp-faq-item">
+      <summary>Dá pra cancelar quando quiser?</summary>
+      <p>Sim, sem contrato de fidelidade.</p>
+    </details>
+  </div>
+</section>
+
+<section class="lp-close lp-wrap">
+  <h2 class="lp-section-title lp-reveal">Comece a medir <em>antes de decidir</em>.</h2>
+  <p class="lp-section-lead lp-reveal">Sem cartão, sem cobrança. Veja o número da sua perda primeiro.</p>
+  <div class="lp-actions lp-reveal">
+    <a href="/register" class="lp-btn lp-btn-gold">Criar conta <span>→</span></a>
+    <a href="/login" class="lp-btn lp-btn-ghost">Entrar</a>
+  </div>
+</section>
+
+<%- include('partials/footer', { pageJs: 'landing' }) %>
