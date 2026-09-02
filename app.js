@@ -155,6 +155,20 @@ app.get('/vendas', (req, res) => {
   res.render('vendas', { title: 'Vendas', userId: req.session.userId });
 });
 
+app.get('/contagens', (req, res) => {
+  if (!req.session?.userId) {
+    return res.redirect('/login');
+  }
+  res.render('contagens', { title: 'Contagem de Estoque', userId: req.session.userId });
+});
+
+app.get('/resultado', (req, res) => {
+  if (!req.session?.userId) {
+    return res.redirect('/login');
+  }
+  res.render('resultado', { title: 'Resultado do Período', userId: req.session.userId });
+});
+
 // Auth routes (sem CSRF para login/signup públicos)
 app.use('/auth', authRoutes);
 

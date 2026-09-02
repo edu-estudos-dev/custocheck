@@ -1,0 +1,152 @@
+<%- include('partials/header') %>
+<div class="container">
+  <h1>Contagem de Estoque</h1>
+  <p class="meta page-lead">Registre quanto sobrou fisicamente de cada insumo. É o que fecha a conta do CMV real.</p>
+
+  <div class="stack-actions">
+    <div class="form-group">
+      <label for="lojaId">Loja</label>
+      <select id="lojaId" required></select>
+    </div>
+    <button type="button" class="btn-primary" id="showFormBtn">+ Nova Contagem</button>
+  </div>
+
+  <div id="newContagemForm" class="panel" hidden>
+    <div class="card">
+      <h3>Nova Contagem</h3>
+      <form class="form" id="contagemForm">
+        <div class="form-group">
+          <label for="dataReferencia">Data da Contagem</label>
+          <input type="date" id="dataReferencia" required>
+        </div>
+
+        <div id="itensContagem"></div>
+
+        <div class="stack-actions">
+          <button type="submit" class="btn-primary">Salvar Contagem</button>
+          <button type="button" class="btn-secondary" id="cancelFormBtn">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="contagensList">
+    <p>Carregando...</p>
+  </div>
+
+  <script nonce="<%= cspNonce %>">
+    const lojaSelect = document.getElementById('lojaId');
+    const form = document.getElementById('newContagemForm');
+    const itensContainer = document.getElementById('itensContagem');
+    const list = document.getElementById('contagensList');
+    let insumos = [];
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text ?? '';
+      return div.innerHTML;
+    }
+
+    async function fillSelect(select, url) {
+      const res = await fetch(url);
+      if (!res.ok) return [];
+      const items = await res.json();
+      select.innerHTML = items
+        .map((i) => `<option value="${escapeHtml(i.id)}">${escapeHtml(i.nome)}</option>`)
+        .join('');
+      return items;
+    }
+
+    function renderItensContagem() {
+      if (insumos.length === 0) {
+        itensContainer.innerHTML = '<p class="meta">Cadastre insumos antes de fazer uma contagem.</p>';
+        return;
+      }
+      itensContainer.innerHTML = insumos.map((i) => `
+        <div class="form-group">
+          <label for="item-${i.id}">${escapeHtml(i.nome)} (${escapeHtml(i.unidade_base)})</label>
+          <input type="number" step="0.001" min="0" id="item-${i.id}" data-insumo-id="${i.id}" placeholder="0" required>
+        </div>
+      `).join('');
+    }
+
+    async function loadContagens() {
+      const lojaId = lojaSelect.value;
+      if (!lojaId) {
+        list.innerHTML = '<p>Cadastre uma loja para fazer contagens.</p>';
+        return;
+      }
+
+      const res = await fetch(`/api/contagens?lojaId=${encodeURIComponent(lojaId)}`);
+      if (!res.ok) {
+        list.innerHTML = '<p>Não foi possível carregar as contagens.</p>';
+        return;
+      }
+      const contagens = await res.json();
+
+      list.innerHTML = contagens.length === 0
+        ? '<p>Nenhuma contagem registrada</p>'
+        : `<div class="table-wrap"><table class="table">
+            <thead><tr><th>Data</th><th>Status</th></tr></thead>
+            <tbody>${contagens.map((c) => `
+              <tr>
+                <td>${new Date(c.data_referencia).toLocaleDateString('pt-BR')}</td>
+                <td>${escapeHtml(c.status)}</td>
+              </tr>`).join('')}
+            </tbody></table></div>`;
+    }
+
+    function hideForm() {
+      form.hidden = true;
+      document.getElementById('contagemForm').reset();
+    }
+
+    document.getElementById('showFormBtn').addEventListener('click', () => {
+      form.hidden = false;
+      document.getElementById('dataReferencia').focus();
+    });
+
+    document.getElementById('cancelFormBtn').addEventListener('click', hideForm);
+
+    lojaSelect.addEventListener('change', loadContagens);
+
+    document.getElementById('contagemForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const itens = insumos.map((i) => ({
+        insumoId: i.id,
+        qtdBase: document.getElementById(`item-${i.id}`).value,
+      }));
+
+      const res = await fetch('/api/contagens', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': window.csrfToken,
+        },
+        body: JSON.stringify({
+          lojaId: lojaSelect.value,
+          dataReferencia: document.getElementById('dataReferencia').value,
+          itens,
+        }),
+      });
+
+      if (res.ok) {
+        hideForm();
+        loadContagens();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert('Erro ao salvar contagem: ' + (err.error || res.status));
+      }
+    });
+
+    (async () => {
+      await fillSelect(lojaSelect, '/api/lojas');
+      const res = await fetch('/api/insumos');
+      insumos = res.ok ? await res.json() : [];
+      renderItensContagem();
+      loadContagens();
+    })();
+  </script>
+</div>
+<%- include('partials/footer') %>

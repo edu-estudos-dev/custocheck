@@ -4,6 +4,8 @@ import * as lojaController from '../controllers/lojas.js';
 import * as insumoController from '../controllers/insumos.js';
 import * as compraController from '../controllers/compras.js';
 import * as vendaController from '../controllers/vendas.js';
+import * as contagemController from '../controllers/contagens.js';
+import * as resultadoController from '../controllers/resultado.js';
 
 const router = express.Router();
 
@@ -37,5 +39,13 @@ router.post('/vendas', vendaController.createVenda);
 router.get('/vendas', vendaController.listVendas);
 router.get('/vendas/periodo', vendaController.getVenda);
 router.put('/vendas/:id', vendaController.updateVenda);
+
+// Contagens
+router.post('/contagens', contagemController.createContagem);
+router.get('/contagens', contagemController.listContagens);
+router.get('/contagens/:id', contagemController.getContagemById);
+
+// Resultado do período
+router.get('/resultado', resultadoController.getResultadoPeriodo);
 
 export default router;

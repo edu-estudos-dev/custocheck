@@ -623,3 +623,35 @@ input[type='number'] {
 .nav-form {
   display: inline-flex;
 }
+
+/* Resultado / Contagem */
+.page-lead {
+  margin-bottom: var(--space-6);
+}
+
+.card-tight {
+  margin-bottom: var(--space-6);
+}
+
+.card-warning {
+  border-color: var(--pending);
+  margin-bottom: var(--space-4);
+}
+
+.card-warning p {
+  color: var(--pending);
+  margin: 0;
+}
+
+.result-headline {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  color: var(--acai-700);
+  margin-bottom: var(--space-6);
+}
+
+@media (prefers-color-scheme: dark) {
+  .result-headline {
+    color: var(--ink);
+  }
+}

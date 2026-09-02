@@ -1,0 +1,104 @@
+<%- include('partials/header') %>
+<div class="container">
+  <h1>Resultado do Período</h1>
+  <p class="meta page-lead">Escolha a loja e o período. Com contagem no início e no fim, o CMV é real — sem contagem, é aproximado por compras.</p>
+
+  <div class="card card-tight">
+    <form class="form" id="resultadoForm">
+      <div class="form-group">
+        <label for="lojaId">Loja</label>
+        <select id="lojaId" required></select>
+      </div>
+      <div class="form-group">
+        <label for="dataInicio">Data Início</label>
+        <input type="date" id="dataInicio" required>
+      </div>
+      <div class="form-group">
+        <label for="dataFim">Data Fim</label>
+        <input type="date" id="dataFim" required>
+      </div>
+      <button type="submit" class="btn-primary">Calcular</button>
+    </form>
+  </div>
+
+  <div id="resultadoOutput"></div>
+
+  <script nonce="<%= cspNonce %>">
+    const lojaSelect = document.getElementById('lojaId');
+    const output = document.getElementById('resultadoOutput');
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text ?? '';
+      return div.innerHTML;
+    }
+
+    function formatMoney(v) {
+      return v === null || v === undefined
+        ? '—'
+        : v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    async function fillSelect(select, url) {
+      const res = await fetch(url);
+      if (!res.ok) return [];
+      const items = await res.json();
+      select.innerHTML = items
+        .map((i) => `<option value="${escapeHtml(i.id)}">${escapeHtml(i.nome)}</option>`)
+        .join('');
+      return items;
+    }
+
+    document.getElementById('resultadoForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const params = new URLSearchParams({
+        lojaId: lojaSelect.value,
+        dataInicio: document.getElementById('dataInicio').value,
+        dataFim: document.getElementById('dataFim').value,
+      });
+
+      const res = await fetch(`/api/resultado?${params}`);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        output.innerHTML = `<p>Erro: ${escapeHtml(err.error || res.status)}</p>`;
+        return;
+      }
+
+      const r = await res.json();
+
+      const avisoContagem = r.contagemCompleta
+        ? ''
+        : `<div class="card card-warning">
+             <p>
+               Sem contagem de estoque cobrindo esse período — o CMV abaixo é aproximado (compras ÷ faturamento).
+               <a href="/contagens">Registre uma contagem</a> no início e no fim do período para ver o resultado real.
+             </p>
+           </div>`;
+
+      output.innerHTML = `
+        ${avisoContagem}
+        <div class="card">
+          <h2>CMV do período</h2>
+          <p class="result-headline">${r.cmvPercent}%</p>
+          <div class="table-wrap">
+            <table class="table">
+              <tbody>
+                <tr><td>Faturamento</td><td class="num">${formatMoney(r.faturamento)}</td></tr>
+                <tr><td>Compras no período</td><td class="num">${formatMoney(r.comprasPeriodo)}</td></tr>
+                <tr><td>Estoque inicial (valor)</td><td class="num">${formatMoney(r.estoqueInicial)}</td></tr>
+                <tr><td>Estoque final (valor)</td><td class="num">${formatMoney(r.estoqueFinal)}</td></tr>
+                <tr><td><strong>CMV (R$)</strong></td><td class="num"><strong>${formatMoney(r.cmvReais)}</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    });
+
+    (async () => {
+      await fillSelect(lojaSelect, '/api/lojas');
+    })();
+  </script>
+</div>
+<%- include('partials/footer') %>
