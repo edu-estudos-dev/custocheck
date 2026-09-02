@@ -139,6 +139,12 @@ body {
   color: var(--gold-300);
 }
 
+.logo-cap {
+  font-size: 1.3em;
+  line-height: 0;
+  vertical-align: -0.06em;
+}
+
 .nav {
   display: flex;
   gap: var(--space-4);
