@@ -509,6 +509,7 @@ input[type='number'] {
 .stack-actions {
   margin-bottom: 2rem;
   display: flex;
+  align-items: flex-end;
   gap: var(--space-3);
   flex-wrap: wrap;
 }
