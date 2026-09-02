@@ -1,42 +1,48 @@
-<%- include('partials/header', { bodyClass: 'page-landing', pageCss: 'landing', pageJs: 'auth' }) %>
+<%- include('partials/header', { bodyClass: 'page-landing page-auth-split', pageCss: 'landing', pageJs: 'auth' }) %>
 
-<div class="lp-auth-shell">
-  <div class="lp-auth-card">
-    <div class="lp-auth-icon">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="4" y="10" width="16" height="10" rx="2" fill="#12061C"/>
-        <path d="M7 10V7a5 5 0 0 1 10 0v3" stroke="#F3CF7A" stroke-width="1.8" stroke-linecap="round"/>
-        <circle cx="12" cy="15" r="1.6" fill="#F3CF7A"/>
-      </svg>
-    </div>
-    <h1>Nova senha</h1>
-    <p class="lp-auth-lead">Escolha uma senha nova para a sua conta.</p>
+<div class="lp-split-shell">
+  <%- include('partials/auth-brand') %>
 
-    <div class="lp-auth-msg lp-auth-msg-error" id="formError"></div>
-    <div class="lp-auth-msg lp-auth-msg-ok" id="formSuccess"></div>
+  <div class="lp-split-form">
+    <div class="lp-auth-shell">
+      <div class="lp-auth-card">
+        <div class="lp-auth-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="10" width="16" height="10" rx="2" fill="#12061C"/>
+            <path d="M7 10V7a5 5 0 0 1 10 0v3" stroke="#F3CF7A" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="12" cy="15" r="1.6" fill="#F3CF7A"/>
+          </svg>
+        </div>
+        <h1>Nova senha</h1>
+        <p class="lp-auth-lead">Escolha uma senha nova para a sua conta.</p>
 
-    <% if (!token) { %>
-      <div class="lp-auth-msg lp-auth-msg-error is-visible">
-        Link inválido. Peça um novo em <a href="/esqueci-senha" style="color:inherit;text-decoration:underline;">esqueci minha senha</a>.
+        <div class="lp-auth-msg lp-auth-msg-error" id="formError"></div>
+        <div class="lp-auth-msg lp-auth-msg-ok" id="formSuccess"></div>
+
+        <% if (!token) { %>
+          <div class="lp-auth-msg lp-auth-msg-error is-visible">
+            Link inválido. Peça um novo em <a href="/esqueci-senha" style="color:inherit;text-decoration:underline;">esqueci minha senha</a>.
+          </div>
+        <% } else { %>
+          <form class="form" id="resetForm" novalidate>
+            <input type="hidden" id="token" value="<%= token %>">
+            <div class="form-group">
+              <label for="password">Nova senha (mín. 8 chars, 1 maiúscula, 1 minúscula, 1 número)</label>
+              <input type="password" id="password" name="senha" autocomplete="new-password" required>
+            </div>
+            <div class="form-group">
+              <label for="passwordConfirm">Confirmar nova senha</label>
+              <input type="password" id="passwordConfirm" name="senhaConfirm" autocomplete="new-password" required>
+            </div>
+
+            <button type="submit" class="btn-primary btn-block" id="submitBtn">Redefinir senha</button>
+          </form>
+        <% } %>
+
+        <div class="lp-auth-links">
+          <a href="/login">Voltar para o login</a>
+        </div>
       </div>
-    <% } else { %>
-      <form class="form" id="resetForm" novalidate>
-        <input type="hidden" id="token" value="<%= token %>">
-        <div class="form-group">
-          <label for="password">Nova senha (mín. 8 chars, 1 maiúscula, 1 minúscula, 1 número)</label>
-          <input type="password" id="password" name="senha" autocomplete="new-password" required>
-        </div>
-        <div class="form-group">
-          <label for="passwordConfirm">Confirmar nova senha</label>
-          <input type="password" id="passwordConfirm" name="senhaConfirm" autocomplete="new-password" required>
-        </div>
-
-        <button type="submit" class="btn-primary btn-block" id="submitBtn">Redefinir senha</button>
-      </form>
-    <% } %>
-
-    <div class="lp-auth-links">
-      <a href="/login">Voltar para o login</a>
     </div>
   </div>
 </div>

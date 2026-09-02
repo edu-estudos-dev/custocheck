@@ -1,35 +1,41 @@
-<%- include('partials/header', { bodyClass: 'page-landing', pageCss: 'landing', pageJs: 'auth' }) %>
+<%- include('partials/header', { bodyClass: 'page-landing page-auth-split', pageCss: 'landing', pageJs: 'auth' }) %>
 
-<div class="lp-auth-shell">
-  <div class="lp-auth-card">
-    <div class="lp-auth-icon">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2 4 5v6c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V5l-8-3Z" fill="#12061C"/>
-        <path d="M8.5 12.2 11 14.7l4.5-5" stroke="#F3CF7A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
-    <h1>Bem-vindo de volta</h1>
-    <p class="lp-auth-lead">Entre pra ver o número que sumiu esse mês.</p>
+<div class="lp-split-shell">
+  <%- include('partials/auth-brand') %>
 
-    <div class="lp-auth-msg lp-auth-msg-error" id="formError"></div>
+  <div class="lp-split-form">
+    <div class="lp-auth-shell">
+      <div class="lp-auth-card">
+        <div class="lp-auth-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2 4 5v6c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V5l-8-3Z" fill="#12061C"/>
+            <path d="M8.5 12.2 11 14.7l4.5-5" stroke="#F3CF7A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h1>Bem-vindo de volta</h1>
+        <p class="lp-auth-lead">Entre pra ver o número que sumiu esse mês.</p>
 
-    <form class="form" id="loginForm" novalidate>
-      <div class="form-group">
-        <label for="email">Usuário ou email</label>
-        <input type="text" id="email" name="email" autocomplete="username" required>
+        <div class="lp-auth-msg lp-auth-msg-error" id="formError"></div>
+
+        <form class="form" id="loginForm" novalidate>
+          <div class="form-group">
+            <label for="email">Usuário ou email</label>
+            <input type="text" id="email" name="email" autocomplete="username" required>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Senha</label>
+            <input type="password" id="password" name="senha" autocomplete="current-password" required>
+          </div>
+
+          <button type="submit" class="btn-primary btn-block" id="submitBtn">Entrar</button>
+        </form>
+
+        <div class="lp-auth-links">
+          <a href="/esqueci-senha">Esqueci minha senha</a>
+          <span>Não tem conta? <a href="/register" class="lp-auth-primary-link">Criar agora</a></span>
+        </div>
       </div>
-
-      <div class="form-group">
-        <label for="password">Senha</label>
-        <input type="password" id="password" name="senha" autocomplete="current-password" required>
-      </div>
-
-      <button type="submit" class="btn-primary btn-block" id="submitBtn">Entrar</button>
-    </form>
-
-    <div class="lp-auth-links">
-      <a href="/esqueci-senha">Esqueci minha senha</a>
-      <span>Não tem conta? <a href="/register" class="lp-auth-primary-link">Criar agora</a></span>
     </div>
   </div>
 </div>
