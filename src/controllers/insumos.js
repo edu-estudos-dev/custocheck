@@ -54,7 +54,15 @@ export const createEmbalagem = async (req, res) => {
       return res.status(400).json({ error: 'Descrição e fator obrigatórios' });
     }
 
-    const embalagem = await insumoModel.createEmbalagem(insumoId, descricao, fatorConversao);
+    const insumo = await insumoModel.getInsumoById(insumoId, req.session.contaId);
+    if (!insumo) return res.status(404).json({ error: 'Insumo não encontrado' });
+
+    const embalagem = await insumoModel.createEmbalagem(
+      req.session.contaId,
+      insumoId,
+      descricao,
+      fatorConversao
+    );
     res.status(201).json(embalagem);
   } catch (error) {
     console.error(error);
@@ -64,7 +72,7 @@ export const createEmbalagem = async (req, res) => {
 
 export const listEmbalagens = async (req, res) => {
   try {
-    const embalagens = await insumoModel.getEmbalagensByInsumoId(req.params.id);
+    const embalagens = await insumoModel.getEmbalagensByInsumoId(req.session.contaId, req.params.id);
     res.json(embalagens);
   } catch (error) {
     console.error(error);

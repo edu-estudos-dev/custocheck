@@ -56,5 +56,15 @@ export const calculateCMVPercent = async (contaId, lojaId, dataInicio, dataFim) 
     return 0;
   }
 
-  return 0;
+  const compraResult = await pool.query(
+    `SELECT SUM(valor_total) as custo_total
+     FROM compras
+     WHERE conta_id = $1 AND loja_id = $2
+       AND data_compra >= $3 AND data_compra <= $4`,
+    [contaId, lojaId, dataInicio, dataFim]
+  );
+
+  const custoTotal = parseFloat(compraResult.rows[0]?.custo_total) || 0;
+
+  return roundMoney((custoTotal / faturamentoTotal) * 100);
 };

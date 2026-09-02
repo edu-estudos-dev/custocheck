@@ -57,30 +57,3 @@ export const listComprasByLojaId = async (lojaId, contaId, dataInicio = null, da
   const result = await pool.query(query, params);
   return result.rows;
 };
-
-export const getCustoMedioPonderado = async (contaId, insumoId, dataInicio = null, dataFim = null) => {
-  let query = `
-    SELECT
-      SUM(qtd_embalagens * COALESCE(ie.fator_conversao, 1)) as qtd_base_total,
-      SUM(valor_total) as valor_total,
-      SUM(valor_total) / NULLIF(SUM(qtd_embalagens * COALESCE(ie.fator_conversao, 1)), 0) as custo_medio_ponderado
-    FROM compras c
-    LEFT JOIN insumo_embalagens ie ON c.embalagem_id = ie.id
-    WHERE c.conta_id = $1 AND c.insumo_id = $2
-  `;
-
-  const params = [contaId, insumoId];
-
-  if (dataInicio) {
-    params.push(dataInicio);
-    query += ` AND c.data_compra >= $${params.length}`;
-  }
-
-  if (dataFim) {
-    params.push(dataFim);
-    query += ` AND c.data_compra <= $${params.length}`;
-  }
-
-  const result = await pool.query(query, params);
-  return result.rows[0];
-};

@@ -20,6 +20,14 @@ export const getUserByEmail = async (email) => {
   return result.rows[0];
 };
 
+export const getUserByLogin = async (login) => {
+  const result = await pool.query(
+    'SELECT id, conta_id, nome, email, senha_hash, papel, ativo FROM usuarios WHERE email = $1 OR usuario = $1',
+    [login]
+  );
+  return result.rows[0];
+};
+
 export const getUserById = async (userId, contaId = null) => {
   const query = contaId
     ? 'SELECT id, conta_id, nome, email, papel, ativo FROM usuarios WHERE id = $1 AND conta_id = $2'

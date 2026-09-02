@@ -42,31 +42,31 @@ export const updateInsumo = async (insumoId, contaId, updates) => {
   return result.rows[0];
 };
 
-export const createEmbalagem = async (insumoId, descricao, fatorConversao) => {
+export const createEmbalagem = async (contaId, insumoId, descricao, fatorConversao) => {
   const result = await pool.query(
-    `INSERT INTO insumo_embalagens (insumo_id, descricao, fator_conversao)
-     VALUES ($1, $2, $3)
-     RETURNING id, insumo_id, descricao, fator_conversao, criado_em`,
-    [insumoId, descricao, fatorConversao]
+    `INSERT INTO insumo_embalagens (conta_id, insumo_id, descricao, fator_conversao)
+     VALUES ($1, $2, $3, $4)
+     RETURNING id, conta_id, insumo_id, descricao, fator_conversao, criado_em`,
+    [contaId, insumoId, descricao, fatorConversao]
   );
   return result.rows[0];
 };
 
-export const getEmbalagensByInsumoId = async (insumoId) => {
+export const getEmbalagensByInsumoId = async (contaId, insumoId) => {
   const result = await pool.query(
-    `SELECT id, insumo_id, descricao, fator_conversao, criado_em
+    `SELECT id, conta_id, insumo_id, descricao, fator_conversao, criado_em
      FROM insumo_embalagens
-     WHERE insumo_id = $1
+     WHERE conta_id = $1 AND insumo_id = $2
      ORDER BY criado_em DESC`,
-    [insumoId]
+    [contaId, insumoId]
   );
   return result.rows;
 };
 
-export const getEmbalagemById = async (embalagemId) => {
+export const getEmbalagemById = async (contaId, embalagemId) => {
   const result = await pool.query(
-    'SELECT id, insumo_id, descricao, fator_conversao, criado_em FROM insumo_embalagens WHERE id = $1',
-    [embalagemId]
+    'SELECT id, conta_id, insumo_id, descricao, fator_conversao, criado_em FROM insumo_embalagens WHERE id = $1 AND conta_id = $2',
+    [embalagemId, contaId]
   );
   return result.rows[0];
 };

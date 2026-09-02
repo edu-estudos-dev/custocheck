@@ -2,20 +2,21 @@ import express from 'express';
 import * as userModel from '../models/users.js';
 import { sanitize, validateEmail, validatePassword } from '../utilities/validation.js';
 import { withTransaction } from '../config/database.js';
+import { loginLimiter, signupLimiter } from '../middleware/security.js';
 import bcrypt from 'bcrypt';
 
 const router = express.Router();
 
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   try {
     const { email, senha } = req.body;
 
     if (!email || !senha) {
-      return res.status(400).json({ error: 'Email e senha obrigatórios' });
+      return res.status(400).json({ error: 'Usuário e senha obrigatórios' });
     }
 
-    const emailSafe = sanitize(email).toLowerCase();
-    const user = await userModel.getUserByEmail(emailSafe);
+    const loginSafe = sanitize(email).toLowerCase();
+    const user = await userModel.getUserByLogin(loginSafe);
 
     if (!user || !user.ativo) {
       return res.status(401).json({ error: 'Credenciais inválidas' });
@@ -40,7 +41,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.post('/signup', async (req, res) => {
+router.post('/signup', signupLimiter, async (req, res) => {
   try {
     const { nome, email, senha } = req.body;
 

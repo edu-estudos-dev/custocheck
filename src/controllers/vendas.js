@@ -1,4 +1,5 @@
 import * as vendaModel from '../models/vendas.js';
+import * as lojaModel from '../models/lojas.js';
 
 export const createVenda = async (req, res) => {
   try {
@@ -7,6 +8,9 @@ export const createVenda = async (req, res) => {
     if (!lojaId || !dataInicio || !dataFim || !faturamento) {
       return res.status(400).json({ error: 'Campos obrigatórios faltando' });
     }
+
+    const loja = await lojaModel.getLojaById(lojaId, req.session.contaId);
+    if (!loja) return res.status(404).json({ error: 'Loja não encontrada' });
 
     const venda = await vendaModel.createVendaPeriodo(
       req.session.contaId,

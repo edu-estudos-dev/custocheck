@@ -1,4 +1,6 @@
 import * as compraModel from '../models/compras.js';
+import * as lojaModel from '../models/lojas.js';
+import * as insumoModel from '../models/insumos.js';
 import * as costService from '../services/costCalculation.js';
 
 export const createCompra = async (req, res) => {
@@ -7,6 +9,19 @@ export const createCompra = async (req, res) => {
 
     if (!lojaId || !insumoId || !qtdEmbalagens || !valorTotal) {
       return res.status(400).json({ error: 'Campos obrigatórios faltando' });
+    }
+
+    const [loja, insumo] = await Promise.all([
+      lojaModel.getLojaById(lojaId, req.session.contaId),
+      insumoModel.getInsumoById(insumoId, req.session.contaId),
+    ]);
+
+    if (!loja) return res.status(404).json({ error: 'Loja não encontrada' });
+    if (!insumo) return res.status(404).json({ error: 'Insumo não encontrado' });
+
+    if (embalagemId) {
+      const embalagem = await insumoModel.getEmbalagemById(req.session.contaId, embalagemId);
+      if (!embalagem) return res.status(404).json({ error: 'Embalagem não encontrada' });
     }
 
     const compra = await compraModel.createCompra(
