@@ -21,6 +21,38 @@ export const createContagem = async (contaId, lojaId, dataReferencia, criadoPor,
   });
 };
 
+export const updateContagem = async (contagemId, contaId, dataReferencia, itens) => {
+  return withTransaction(async (client) => {
+    const contagemRes = await client.query(
+      `UPDATE contagens SET data_referencia = $1
+       WHERE id = $2 AND conta_id = $3
+       RETURNING id, conta_id, loja_id, data_referencia, status, criado_por, criado_em`,
+      [dataReferencia, contagemId, contaId]
+    );
+    const contagem = contagemRes.rows[0];
+    if (!contagem) return null;
+
+    await client.query('DELETE FROM contagem_itens WHERE contagem_id = $1', [contagemId]);
+
+    for (const item of itens) {
+      await client.query(
+        `INSERT INTO contagem_itens (contagem_id, insumo_id, qtd_base) VALUES ($1, $2, $3)`,
+        [contagem.id, item.insumoId, item.qtdBase]
+      );
+    }
+
+    return contagem;
+  });
+};
+
+export const deleteContagem = async (contagemId, contaId) => {
+  const result = await pool.query(
+    'DELETE FROM contagens WHERE id = $1 AND conta_id = $2 RETURNING id',
+    [contagemId, contaId]
+  );
+  return result.rows[0];
+};
+
 export const listContagensByLoja = async (lojaId, contaId) => {
   const result = await pool.query(
     `SELECT id, conta_id, loja_id, data_referencia, status, criado_em

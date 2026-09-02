@@ -111,33 +111,44 @@ export const globalLimiter =
       })
     : (req, res, next) => next();
 
-export const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-  skipSuccessfulRequests: true,
-  keyGenerator: (req) => req.ip || req.connection.remoteAddress,
-  message: 'Too many login attempts, please try again in 15 minutes',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+const passthrough = (req, res, next) => next();
 
-export const signupLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 3,
-  keyGenerator: (req) => req.ip || req.connection.remoteAddress,
-  message: 'Too many signup attempts, please try again in 15 minutes',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+export const loginLimiter =
+  process.env.NODE_ENV === 'production'
+    ? rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 5,
+        skipSuccessfulRequests: true,
+        keyGenerator: (req) => req.ip || req.connection.remoteAddress,
+        message: 'Too many login attempts, please try again in 15 minutes',
+        standardHeaders: true,
+        legacyHeaders: false,
+      })
+    : passthrough;
 
-export const passwordResetLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-  keyGenerator: (req) => req.ip || req.connection.remoteAddress,
-  message: 'Too many password reset attempts, please try again in 15 minutes',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+export const signupLimiter =
+  process.env.NODE_ENV === 'production'
+    ? rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 3,
+        keyGenerator: (req) => req.ip || req.connection.remoteAddress,
+        message: 'Too many signup attempts, please try again in 15 minutes',
+        standardHeaders: true,
+        legacyHeaders: false,
+      })
+    : passthrough;
+
+export const passwordResetLimiter =
+  process.env.NODE_ENV === 'production'
+    ? rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 5,
+        keyGenerator: (req) => req.ip || req.connection.remoteAddress,
+        message: 'Too many password reset attempts, please try again in 15 minutes',
+        standardHeaders: true,
+        legacyHeaders: false,
+      })
+    : passthrough;
 
 export const expensiveWriteLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

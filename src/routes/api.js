@@ -44,6 +44,8 @@ router.put('/vendas/:id', vendaController.updateVenda);
 router.post('/contagens', contagemController.createContagem);
 router.get('/contagens', contagemController.listContagens);
 router.get('/contagens/:id', contagemController.getContagemById);
+router.put('/contagens/:id', contagemController.updateContagem);
+router.delete('/contagens/:id', contagemController.deleteContagem);
 
 // Resultado do período
 router.get('/resultado', resultadoController.getResultadoPeriodo);
