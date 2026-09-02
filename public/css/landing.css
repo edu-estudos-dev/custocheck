@@ -661,7 +661,7 @@
   .page-landing .logo-icon { width: 26px; height: 26px; }
   .page-landing .nav { width: auto; gap: var(--space-1); }
   .page-landing .nav a { padding: var(--space-2); font-size: 0.85rem; }
-  .page-landing .nav a.btn-primary { padding: 0 var(--space-3); white-space: nowrap; }
+  .page-landing .nav a.btn-primary { padding: 0 var(--space-3); font-size: 0.85rem; white-space: nowrap; }
   .lp-actions .lp-btn { flex: 1 1 100%; justify-content: center; }
 }
 
@@ -670,7 +670,7 @@
   .page-landing .logo-icon { width: 22px; height: 22px; }
   .page-landing .nav { gap: 2px; }
   .page-landing .nav a { padding: var(--space-1) 6px; font-size: 0.78rem; }
-  .page-landing .nav a.btn-primary { padding: 0 var(--space-2); }
+  .page-landing .nav a.btn-primary { padding: 0 var(--space-2); font-size: 0.78rem; }
 }
 
 @media (max-width: 360px) {
@@ -678,6 +678,7 @@
   .page-landing .logo { font-size: 0.9rem; gap: 4px; }
   .page-landing .logo-icon { width: 20px; height: 20px; }
   .page-landing .nav a:not(.btn-primary) { padding: 4px; font-size: 0.72rem; }
+  .page-landing .nav a.btn-primary { font-size: 0.72rem; }
   .page-landing .nav a[href="/precos"] { display: none; }
 }
 
