@@ -1,5 +1,16 @@
 // Formulários de autenticação: login, cadastro, esqueci/resetar senha.
 (() => {
+  document.querySelectorAll('.lp-password-toggle').forEach((btn) => {
+    const input = document.getElementById(btn.dataset.togglePassword);
+    if (!input) return;
+    btn.addEventListener('click', () => {
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      btn.classList.toggle('is-visible', show);
+      btn.setAttribute('aria-label', show ? 'Ocultar senha' : 'Mostrar senha');
+    });
+  });
+
   const errorEl = document.getElementById('formError');
   const successEl = document.getElementById('formSuccess');
 
