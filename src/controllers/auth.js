@@ -2,6 +2,7 @@ import * as userModel from '../models/users.js';
 import * as contaModel from '../models/contas.js';
 import { sanitize, validateEmail, validatePassword } from '../utilities/validation.js';
 import { withTransaction } from '../config/database.js';
+import bcrypt from 'bcrypt';
 
 export const signup = async (req, res) => {
   try {
@@ -27,6 +28,8 @@ export const signup = async (req, res) => {
       return res.status(409).json({ error: 'Email already registered' });
     }
 
+    const senhaHash = await bcrypt.hash(senha, 10);
+
     const resultado = await withTransaction(async (client) => {
       const contaRes = await client.query(
         'INSERT INTO contas (nome, email, plano) VALUES ($1, $2, $3) RETURNING id, nome, email, plano, criado_em',
@@ -38,7 +41,7 @@ export const signup = async (req, res) => {
         `INSERT INTO usuarios (conta_id, nome, email, senha_hash, papel)
          VALUES ($1, $2, $3, $4, $5)
          RETURNING id, conta_id, nome, email, papel, ativo, criado_em`,
-        [conta.id, nomeSafe, emailSafe, await require('bcrypt').hash(senha, 10), 'dono']
+        [conta.id, nomeSafe, emailSafe, senhaHash, 'dono']
       );
 
       return { conta, usuario: usuarioRes.rows[0] };
