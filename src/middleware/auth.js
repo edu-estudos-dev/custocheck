@@ -3,7 +3,7 @@ import { logger } from '../observability/logger.js';
 export const isAuthenticated = (req, res, next) => {
   if (!req.session?.userId) {
     logger.warn({ path: req.path }, 'Unauthenticated access attempt');
-    return res.status(401).redirect('/login');
+    return res.status(401).json({ error: 'Não autenticado' });
   }
   next();
 };
@@ -11,7 +11,7 @@ export const isAuthenticated = (req, res, next) => {
 export const hasRole = (allowedRoles = []) => {
   return (req, res, next) => {
     if (!req.session?.userId) {
-      return res.status(401).redirect('/login');
+      return res.status(401).json({ error: 'Não autenticado' });
     }
 
     if (!allowedRoles.includes(req.session.papel)) {

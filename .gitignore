@@ -11,3 +11,5 @@ coverage/
 .cache/
 cookies.txt
 .claude/
+test-results/
+playwright-report/

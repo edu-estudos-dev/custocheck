@@ -1,10 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Auth Flow', () => {
-  test('homepage redirects authenticated users to dashboard', async ({ page }) => {
+  test('homepage renders public landing page', async ({ page }) => {
     await page.goto('/');
-    // Esperado: renderiza home publica
-    await expect(page.locator('h1')).toContainText('Descubra quanto de insumo sumiu');
+    await expect(page.locator('h1')).toContainText('Todo mês some');
   });
 
   test('access login page', async ({ page }) => {
