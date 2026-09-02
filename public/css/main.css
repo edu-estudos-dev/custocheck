@@ -399,7 +399,6 @@ input[type='number'] {
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-6);
   margin-top: var(--space-6);
-  max-width: 900px;
 }
 
 @media (max-width: 560px) {
