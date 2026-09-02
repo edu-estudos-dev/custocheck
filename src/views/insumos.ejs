@@ -1,0 +1,94 @@
+<div class="container">
+  <h1>Insumos</h1>
+
+  <div style="margin-bottom: 2rem;">
+    <button class="btn-primary" onclick="showNewInsumoForm()">+ Adicionar Insumo</button>
+  </div>
+
+  <div id="newInsumoForm" style="display: none; margin-bottom: 2rem;">
+    <div class="card">
+      <h3>Novo Insumo</h3>
+      <form class="form" onsubmit="createInsumo(event)">
+        <div class="form-group">
+          <label>Nome</label>
+          <input type="text" id="nomeInsumo" required>
+        </div>
+        <div class="form-group">
+          <label>Unidade Base</label>
+          <select id="unidadeInsumo" required>
+            <option value="g">Grama (g)</option>
+            <option value="ml">Mililitro (ml)</option>
+            <option value="un">Unidade (un)</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary">Criar Insumo</button>
+        <button type="button" class="btn-secondary" onclick="hideNewInsumoForm()">Cancelar</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="insumosList" style="display: none;">
+    <p>Carregando...</p>
+  </div>
+
+  <script nonce="<%= cspNonce %>">
+    window.csrfToken = '<%= safeJson(csrfToken) %>';
+
+    async function loadInsumos() {
+      const res = await fetch('/api/insumos');
+      const insumos = await res.json();
+
+      const html = insumos.length === 0
+        ? '<p>Nenhum insumo cadastrado</p>'
+        : '<div class="grid">' + insumos.map(i => `
+          <div class="card">
+            <h3>${escapeHtml(i.nome)}</h3>
+            <p>Unidade: <strong>${i.unidade_base}</strong></p>
+            <p style="color: var(--ink-soft); font-size: var(--text-sm);">Criado em ${new Date(i.criado_em).toLocaleDateString('pt-BR')}</p>
+          </div>
+        `).join('') + '</div>';
+
+      document.getElementById('insumosList').innerHTML = html;
+      document.getElementById('insumosList').style.display = 'block';
+    }
+
+    async function createInsumo(e) {
+      e.preventDefault();
+      const nome = document.getElementById('nomeInsumo').value;
+      const unidadeBase = document.getElementById('unidadeInsumo').value;
+
+      const res = await fetch('/api/insumos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': window.csrfToken,
+        },
+        body: JSON.stringify({ nome, unidadeBase }),
+      });
+
+      if (res.ok) {
+        hideNewInsumoForm();
+        loadInsumos();
+      } else {
+        alert('Erro ao criar insumo');
+      }
+    }
+
+    function showNewInsumoForm() {
+      document.getElementById('newInsumoForm').style.display = 'block';
+    }
+
+    function hideNewInsumoForm() {
+      document.getElementById('newInsumoForm').style.display = 'none';
+      document.getElementById('nomeInsumo').value = '';
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    loadInsumos();
+  </script>
+</div>

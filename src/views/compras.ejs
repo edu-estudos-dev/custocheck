@@ -1,0 +1,121 @@
+<div class="container">
+  <h1>Compras</h1>
+
+  <div style="margin-bottom: 2rem;">
+    <button class="btn-primary" onclick="showNewCompraForm()">+ Lançar Compra</button>
+  </div>
+
+  <div id="newCompraForm" style="display: none; margin-bottom: 2rem;">
+    <div class="card">
+      <h3>Nova Compra</h3>
+      <form class="form" onsubmit="createCompra(event)">
+        <div class="form-group">
+          <label>Loja</label>
+          <select id="lojaId" required></select>
+        </div>
+        <div class="form-group">
+          <label>Insumo</label>
+          <select id="insumoId" required></select>
+        </div>
+        <div class="form-group">
+          <label>Quantidade (embalagens)</label>
+          <input type="number" id="qtdEmbalagens" step="0.001" required>
+        </div>
+        <div class="form-group">
+          <label>Valor Total (R$)</label>
+          <input type="number" id="valorTotal" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label>Fornecedor (opcional)</label>
+          <input type="text" id="fornecedor">
+        </div>
+        <div class="form-group">
+          <label>Data da Compra</label>
+          <input type="date" id="dataCompra">
+        </div>
+        <button type="submit" class="btn-primary">Lançar Compra</button>
+        <button type="button" class="btn-secondary" onclick="hideNewCompraForm()">Cancelar</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="comprasList" style="display: none;">
+    <p>Carregando...</p>
+  </div>
+
+  <script nonce="<%= cspNonce %>">
+    window.csrfToken = '<%= safeJson(csrfToken) %>';
+
+    async function loadLojas() {
+      const res = await fetch('/api/lojas');
+      const lojas = await res.json();
+      const select = document.getElementById('lojaId');
+      select.innerHTML = lojas.map(l => `<option value="${l.id}">${escapeHtml(l.nome)}</option>`).join('');
+    }
+
+    async function loadInsumos() {
+      const res = await fetch('/api/insumos');
+      const insumos = await res.json();
+      const select = document.getElementById('insumoId');
+      select.innerHTML = insumos.map(i => `<option value="${i.id}">${escapeHtml(i.nome)}</option>`).join('');
+    }
+
+    async function createCompra(e) {
+      e.preventDefault();
+      const lojaId = document.getElementById('lojaId').value;
+      const insumoId = document.getElementById('insumoId').value;
+      const qtdEmbalagens = parseFloat(document.getElementById('qtdEmbalagens').value);
+      const valorTotal = parseFloat(document.getElementById('valorTotal').value);
+      const fornecedor = document.getElementById('fornecedor').value;
+      const dataCompra = document.getElementById('dataCompra').value;
+
+      const res = await fetch('/api/compras', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': window.csrfToken,
+        },
+        body: JSON.stringify({ lojaId, insumoId, qtdEmbalagens, valorTotal, fornecedor, dataCompra }),
+      });
+
+      if (res.ok) {
+        hideNewCompraForm();
+        loadCompras();
+      } else {
+        alert('Erro ao lançar compra');
+      }
+    }
+
+    async function loadCompras() {
+      const lojaId = document.getElementById('lojaId').value || null;
+      if (!lojaId) return;
+
+      const res = await fetch(`/api/compras?lojaId=${lojaId}`);
+      const compras = await res.json();
+
+      const html = compras.length === 0
+        ? '<p>Nenhuma compra registrada</p>'
+        : '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse;"><tr><th style="text-align: left; padding: 8px; border-bottom: 1px solid var(--border);">Insumo</th><th style="text-align: left; padding: 8px; border-bottom: 1px solid var(--border);">Qtd</th><th style="text-align: left; padding: 8px; border-bottom: 1px solid var(--border);">Valor</th><th style="text-align: left; padding: 8px; border-bottom: 1px solid var(--border);">Data</th></tr>' + compras.map(c => `<tr><td style="padding: 8px; border-bottom: 1px solid var(--border);">${escapeHtml(c.insumo_nome)}</td><td style="padding: 8px; border-bottom: 1px solid var(--border);">${c.qtd_embalagens}</td><td style="padding: 8px; border-bottom: 1px solid var(--border);">R$ ${parseFloat(c.valor_total).toFixed(2)}</td><td style="padding: 8px; border-bottom: 1px solid var(--border);">${new Date(c.data_compra).toLocaleDateString('pt-BR')}</td></tr>`).join('') + '</table></div>';
+
+      document.getElementById('comprasList').innerHTML = html;
+      document.getElementById('comprasList').style.display = 'block';
+    }
+
+    function showNewCompraForm() {
+      document.getElementById('newCompraForm').style.display = 'block';
+    }
+
+    function hideNewCompraForm() {
+      document.getElementById('newCompraForm').style.display = 'none';
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    loadLojas();
+    loadInsumos();
+  </script>
+</div>
