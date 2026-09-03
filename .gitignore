@@ -13,3 +13,4 @@ cookies.txt
 .claude/
 test-results/
 playwright-report/
+.worktrees/
