@@ -59,7 +59,7 @@ describe('costCalculation', () => {
 
       const resultado = await calculateWeightedAverageCost(1, 1);
 
-      expect(resultado).toEqual({ qtdBaseTotal: 10000, valorTotal: 350, custoMedio: 0.04 });
+      expect(resultado).toEqual({ qtdBaseTotal: 10000, valorTotal: 350, custoMedio: 0.035 });
     });
 
     it('retorna zeros quando não há compras no período', async () => {
@@ -126,6 +126,28 @@ describe('costCalculation', () => {
       expect(r.estoqueFinal).toBe(2);
       expect(r.cmvReais).toBe(358);
       expect(r.cmvPercent).toBe(35.8);
+    });
+
+    it('mesma contagem nos dois limites nao e completa', async () => {
+      const contagem = {
+        id: 10,
+        data_referencia: '2026-08-01',
+        itens: [{ insumo_id: 2, qtd_base: '1000' }],
+      };
+      getUltimaContagemAteMock.mockResolvedValueOnce(contagem);
+      getUltimaContagemAteMock.mockResolvedValueOnce(contagem);
+      queryMock.mockImplementation((sql) => {
+        if (sql.includes('faturamento_total')) return Promise.resolve({ rows: [{ faturamento_total: '1000.00' }] });
+        if (sql.includes('custo_total')) return Promise.resolve({ rows: [{ custo_total: '350.00' }] });
+        if (sql.includes('custo_medio')) return Promise.resolve({ rows: [{ qtd_base_total: '1000', valor_total: '10.00', custo_medio: '0.01' }] });
+        throw new Error('query inesperada: ' + sql);
+      });
+
+      const r = await calculateResultadoPeriodo(1, 1, '2026-08-01', '2026-08-31');
+
+      expect(r.contagemCompleta).toBe(false);
+      expect(r.cmvReais).toBeNull();
+      expect(r.cmvPercent).toBe(35);
     });
   });
 });
