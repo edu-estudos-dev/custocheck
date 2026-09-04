@@ -1,5 +1,6 @@
 import * as vendaModel from '../models/vendas.js';
 import * as lojaModel from '../models/lojas.js';
+import { isValidDateRange, parsePositiveDecimal } from '../utilities/validation.js';
 
 export const createVenda = async (req, res) => {
   try {
@@ -9,6 +10,11 @@ export const createVenda = async (req, res) => {
       return res.status(400).json({ error: 'Campos obrigatórios faltando' });
     }
 
+    if (!isValidDateRange(dataInicio, dataFim)) {
+      throw new TypeError('Periodo de venda invalido');
+    }
+    const faturamentoNormalizado = parsePositiveDecimal(faturamento);
+
     const loja = await lojaModel.getLojaById(lojaId, req.session.contaId);
     if (!loja) return res.status(404).json({ error: 'Loja não encontrada' });
 
@@ -17,7 +23,7 @@ export const createVenda = async (req, res) => {
       lojaId,
       dataInicio,
       dataFim,
-      faturamento
+      faturamentoNormalizado
     );
 
     if (!venda) {
@@ -26,6 +32,12 @@ export const createVenda = async (req, res) => {
 
     res.status(201).json(venda);
   } catch (error) {
+    if (error.code === '23505') {
+      return res.status(409).json({ error: 'Venda ja registrada para este periodo' });
+    }
+    if (error instanceof TypeError) {
+      return res.status(400).json({ error: error.message });
+    }
     console.error(error);
     res.status(500).json({ error: 'Erro ao criar venda' });
   }
@@ -68,10 +80,17 @@ export const updateVenda = async (req, res) => {
   try {
     const { faturamento } = req.body;
 
-    const venda = await vendaModel.updateVendaPeriodo(req.params.id, req.session.contaId, { faturamento });
+    const faturamentoNormalizado = parsePositiveDecimal(faturamento);
+
+    const venda = await vendaModel.updateVendaPeriodo(req.params.id, req.session.contaId, {
+      faturamento: faturamentoNormalizado,
+    });
     if (!venda) return res.status(404).json({ error: 'Venda não encontrada' });
     res.json(venda);
   } catch (error) {
+    if (error instanceof TypeError) {
+      return res.status(400).json({ error: error.message });
+    }
     console.error(error);
     res.status(500).json({ error: 'Erro ao atualizar venda' });
   }
