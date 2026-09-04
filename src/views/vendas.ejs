@@ -38,7 +38,9 @@
     <p>Carregando...</p>
   </div>
 
-  <script nonce="<%= cspNonce %>">
+  <script type="module" nonce="<%= cspNonce %>">
+    import { formatDateOnly } from '/js/date-only.js';
+
     const lojaSelect = document.getElementById('lojaId');
     const form = document.getElementById('newVendaForm');
     const list = document.getElementById('vendasList');
@@ -78,7 +80,7 @@
             <thead><tr><th>Período</th><th class="num">Faturamento</th></tr></thead>
             <tbody>${vendas.map((v) => `
               <tr>
-                <td>${new Date(v.data_inicio).toLocaleDateString('pt-BR')} — ${new Date(v.data_fim).toLocaleDateString('pt-BR')}</td>
+                <td>${formatDateOnly(v.data_inicio)} — ${formatDateOnly(v.data_fim)}</td>
                 <td class="num">R$ ${parseFloat(v.faturamento).toFixed(2)}</td>
               </tr>`).join('')}
             </tbody></table></div>`;

@@ -35,7 +35,9 @@
     <p>Carregando...</p>
   </div>
 
-  <script nonce="<%= cspNonce %>">
+  <script type="module" nonce="<%= cspNonce %>">
+    import { formatDateOnly } from '/js/date-only.js';
+
     const lojaSelect = document.getElementById('lojaId');
     const form = document.getElementById('newContagemForm');
     const formTitle = document.getElementById('formTitle');
@@ -96,7 +98,7 @@
             <thead><tr><th>Data</th><th>Status</th><th></th></tr></thead>
             <tbody>${contagens.map((c) => `
               <tr>
-                <td>${new Date(c.data_referencia).toLocaleDateString('pt-BR')}</td>
+                <td>${formatDateOnly(c.data_referencia)}</td>
                 <td>${escapeHtml(c.status)}</td>
                 <td class="num"><button type="button" class="btn-secondary btn-edit-contagem" data-id="${c.id}">Editar</button></td>
               </tr>`).join('')}
