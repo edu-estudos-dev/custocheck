@@ -11,6 +11,7 @@
     "migrate:dev": "NODE_ENV=development node scripts/run-migrations.js dev --dry-run",
     "migrate:apply": "NODE_ENV=development node scripts/run-migrations.js dev",
     "test": "vitest",
+    "test:integration": "vitest --config vitest.integration.config.js",
     "test:coverage": "vitest --coverage",
     "test:e2e": "playwright test"
   },
