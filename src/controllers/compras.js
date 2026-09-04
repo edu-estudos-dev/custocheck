@@ -14,7 +14,8 @@ export const createCompra = async (req, res) => {
 
     const qtdEmbalagensNormalizada = parsePositiveDecimal(qtdEmbalagens);
     const valorTotalNormalizado = parsePositiveDecimal(valorTotal);
-    if (dataCompra && !isIsoDate(dataCompra)) {
+    const dataCompraNormalizada = dataCompra ?? null;
+    if (dataCompraNormalizada !== null && !isIsoDate(dataCompraNormalizada)) {
       throw new TypeError('Data de compra invalida');
     }
 
@@ -42,7 +43,7 @@ export const createCompra = async (req, res) => {
       qtdEmbalagensNormalizada,
       valorTotalNormalizado,
       fornecedor,
-      dataCompra
+      dataCompraNormalizada
     );
 
     res.status(201).json(compra);

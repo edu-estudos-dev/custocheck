@@ -108,6 +108,24 @@ describe('financial controllers', () => {
     expect(res.status).toHaveBeenCalledWith(400);
   });
 
+  it.each(['', false, 0])('rejects an explicitly supplied falsy purchase date: %j', async (dataCompra) => {
+    const res = response();
+
+    await createCompra({
+      session: contaSession,
+      body: {
+        lojaId: 11,
+        insumoId: 12,
+        embalagemId: 31,
+        qtdEmbalagens: '2',
+        valorTotal: '15.50',
+        dataCompra,
+      },
+    }, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
   it('rejects a sale with an invalid period or non-positive revenue', async () => {
     const invalidPeriodResponse = response();
     await createVenda({
