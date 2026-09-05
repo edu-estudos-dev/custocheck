@@ -3,21 +3,20 @@ import { AsyncLocalStorage } from 'async_hooks';
 
 export const requestIdStorage = new AsyncLocalStorage();
 
-const pinoConfig = process.env.NODE_ENV === 'production'
-  ? { level: 'info' }
-  : {
-      level: 'debug',
-      transport: {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-          translateTime: 'SYS:standard',
-          ignore: 'pid,hostname',
-        },
-      },
-    };
-
-export const logger = pino(pinoConfig);
+// pino-pretty via transport (worker_threads/thread-stream) crasha no Node
+// 20.6+/22+/24 com essa versão do thread-stream ("this should not happen:
+// undefined"). Roda no processo principal em vez de worker — mesmo
+// resultado visual em dev, sem depender do thread-stream.
+export const logger = process.env.NODE_ENV === 'production'
+  ? pino({ level: 'info' })
+  : pino(
+      { level: 'debug' },
+      (await import('pino-pretty')).default({
+        colorize: true,
+        translateTime: 'SYS:standard',
+        ignore: 'pid,hostname',
+      })
+    );
 
 console.log = logger.info.bind(logger);
 console.error = logger.error.bind(logger);
