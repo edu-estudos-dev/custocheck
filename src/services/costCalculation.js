@@ -37,9 +37,9 @@ export const calculateWeightedAverageCost = async (contaId, insumoId, dataInicio
   }
 
   return {
-    qtdBaseTotal: roundMoney(parseFloat(row.qtd_base_total)),
+    qtdBaseTotal: parseFloat(row.qtd_base_total),
     valorTotal: roundMoney(parseFloat(row.valor_total)),
-    custoMedio: roundMoney(parseFloat(row.custo_medio)),
+    custoMedio: parseFloat(row.custo_medio),
   };
 };
 
@@ -109,7 +109,9 @@ export const calculateResultadoPeriodo = async (contaId, lojaId, dataInicio, dat
   const faturamento = roundMoney(parseFloat(vendaResult.rows[0]?.faturamento_total) || 0);
   const comprasPeriodo = roundMoney(parseFloat(compraResult.rows[0]?.custo_total) || 0);
 
-  const contagemCompleta = Boolean(contagemInicial && contagemFinal);
+  const contagemCompleta = Boolean(
+    contagemInicial && contagemFinal && contagemInicial.id !== contagemFinal.id
+  );
 
   if (!contagemCompleta) {
     const cmvPercentAproximado = faturamento > 0 ? roundMoney((comprasPeriodo / faturamento) * 100) : 0;

@@ -1,6 +1,7 @@
 import * as contagemModel from '../models/contagens.js';
 import * as lojaModel from '../models/lojas.js';
 import * as insumoModel from '../models/insumos.js';
+import { isIsoDate, parseNonNegativeDecimal } from '../utilities/validation.js';
 
 const normalizarItens = async (contaId, itens) => {
   const insumosConta = await insumoModel.listInsumosByContaId(contaId);
@@ -9,7 +10,7 @@ const normalizarItens = async (contaId, itens) => {
   const itensNormalizados = [];
   for (const item of itens) {
     const insumoId = parseInt(item.insumoId, 10);
-    const qtdBase = parseFloat(item.qtdBase);
+    const qtdBase = parseNonNegativeDecimal(item.qtdBase);
     if (!insumoIdsValidos.has(insumoId)) {
       throw new Error(`Insumo ${item.insumoId} não pertence a esta conta`);
     }
@@ -27,6 +28,10 @@ export const createContagem = async (req, res) => {
 
     if (!lojaId || !dataReferencia || !Array.isArray(itens) || itens.length === 0) {
       return res.status(400).json({ error: 'Loja, data e itens da contagem são obrigatórios' });
+    }
+
+    if (!isIsoDate(dataReferencia)) {
+      return res.status(400).json({ error: 'Data de referencia invalida' });
     }
 
     const loja = await lojaModel.getLojaById(lojaId, req.session.contaId);
@@ -47,7 +52,7 @@ export const createContagem = async (req, res) => {
     if (error.code === '23505') {
       return res.status(409).json({ error: 'Já existe uma contagem para esta loja nesta data' });
     }
-    if (error.message.includes('Insumo') || error.message.includes('Quantidade')) {
+    if (error instanceof TypeError || error.message.includes('Insumo') || error.message.includes('Quantidade')) {
       return res.status(400).json({ error: error.message });
     }
     console.error(error);
@@ -61,6 +66,10 @@ export const updateContagem = async (req, res) => {
 
     if (!dataReferencia || !Array.isArray(itens) || itens.length === 0) {
       return res.status(400).json({ error: 'Data e itens da contagem são obrigatórios' });
+    }
+
+    if (!isIsoDate(dataReferencia)) {
+      return res.status(400).json({ error: 'Data de referencia invalida' });
     }
 
     const existente = await contagemModel.getContagemComItens(req.params.id, req.session.contaId);
@@ -81,7 +90,7 @@ export const updateContagem = async (req, res) => {
     if (error.code === '23505') {
       return res.status(409).json({ error: 'Já existe uma contagem para esta loja nesta data' });
     }
-    if (error.message.includes('Insumo') || error.message.includes('Quantidade')) {
+    if (error instanceof TypeError || error.message.includes('Insumo') || error.message.includes('Quantidade')) {
       return res.status(400).json({ error: error.message });
     }
     console.error(error);

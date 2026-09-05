@@ -2,6 +2,7 @@ import * as compraModel from '../models/compras.js';
 import * as lojaModel from '../models/lojas.js';
 import * as insumoModel from '../models/insumos.js';
 import * as costService from '../services/costCalculation.js';
+import { isIsoDate, parsePositiveDecimal } from '../utilities/validation.js';
 
 export const createCompra = async (req, res) => {
   try {
@@ -9,6 +10,13 @@ export const createCompra = async (req, res) => {
 
     if (!lojaId || !insumoId || !qtdEmbalagens || !valorTotal) {
       return res.status(400).json({ error: 'Campos obrigatórios faltando' });
+    }
+
+    const qtdEmbalagensNormalizada = parsePositiveDecimal(qtdEmbalagens);
+    const valorTotalNormalizado = parsePositiveDecimal(valorTotal);
+    const dataCompraNormalizada = dataCompra ?? null;
+    if (dataCompraNormalizada !== null && !isIsoDate(dataCompraNormalizada)) {
+      throw new TypeError('Data de compra invalida');
     }
 
     const [loja, insumo] = await Promise.all([
@@ -22,6 +30,9 @@ export const createCompra = async (req, res) => {
     if (embalagemId) {
       const embalagem = await insumoModel.getEmbalagemById(req.session.contaId, embalagemId);
       if (!embalagem) return res.status(404).json({ error: 'Embalagem não encontrada' });
+      if (String(embalagem.insumo_id) !== String(insumoId)) {
+        return res.status(400).json({ error: 'Embalagem nao pertence ao insumo informado' });
+      }
     }
 
     const compra = await compraModel.createCompra(
@@ -29,14 +40,17 @@ export const createCompra = async (req, res) => {
       lojaId,
       insumoId,
       embalagemId || null,
-      qtdEmbalagens,
-      valorTotal,
+      qtdEmbalagensNormalizada,
+      valorTotalNormalizado,
       fornecedor,
-      dataCompra
+      dataCompraNormalizada
     );
 
     res.status(201).json(compra);
   } catch (error) {
+    if (error instanceof TypeError) {
+      return res.status(400).json({ error: error.message });
+    }
     console.error(error);
     res.status(500).json({ error: 'Erro ao criar compra' });
   }

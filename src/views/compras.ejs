@@ -46,7 +46,9 @@
     <p>Carregando...</p>
   </div>
 
-  <script nonce="<%= cspNonce %>">
+  <script type="module" nonce="<%= cspNonce %>">
+    import { formatDateOnly } from '/js/date-only.js';
+
     const lojaSelect = document.getElementById('lojaId');
     const insumoSelect = document.getElementById('insumoId');
     const form = document.getElementById('newCompraForm');
@@ -91,7 +93,7 @@
                 <td>${escapeHtml(c.insumo_nome)}</td>
                 <td class="num">${c.qtd_embalagens}</td>
                 <td class="num">R$ ${parseFloat(c.valor_total).toFixed(2)}</td>
-                <td>${new Date(c.data_compra).toLocaleDateString('pt-BR')}</td>
+                <td>${formatDateOnly(c.data_compra)}</td>
               </tr>`).join('')}
             </tbody></table></div>`;
     }

@@ -1,4 +1,5 @@
 import * as insumoModel from '../models/insumos.js';
+import { parsePositiveDecimal } from '../utilities/validation.js';
 
 export const createInsumo = async (req, res) => {
   try {
@@ -54,6 +55,8 @@ export const createEmbalagem = async (req, res) => {
       return res.status(400).json({ error: 'Descrição e fator obrigatórios' });
     }
 
+    const fatorConversaoNormalizado = parsePositiveDecimal(fatorConversao);
+
     const insumo = await insumoModel.getInsumoById(insumoId, req.session.contaId);
     if (!insumo) return res.status(404).json({ error: 'Insumo não encontrado' });
 
@@ -61,10 +64,13 @@ export const createEmbalagem = async (req, res) => {
       req.session.contaId,
       insumoId,
       descricao,
-      fatorConversao
+      fatorConversaoNormalizado
     );
     res.status(201).json(embalagem);
   } catch (error) {
+    if (error instanceof TypeError) {
+      return res.status(400).json({ error: error.message });
+    }
     console.error(error);
     res.status(500).json({ error: 'Erro ao criar embalagem' });
   }

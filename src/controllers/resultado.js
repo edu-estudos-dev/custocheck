@@ -1,5 +1,6 @@
 import * as costService from '../services/costCalculation.js';
 import * as lojaModel from '../models/lojas.js';
+import { isValidDateRange } from '../utilities/validation.js';
 
 export const getResultadoPeriodo = async (req, res) => {
   try {
@@ -7,6 +8,10 @@ export const getResultadoPeriodo = async (req, res) => {
 
     if (!lojaId || !dataInicio || !dataFim) {
       return res.status(400).json({ error: 'lojaId, dataInicio e dataFim obrigatórios' });
+    }
+
+    if (!isValidDateRange(dataInicio, dataFim)) {
+      return res.status(400).json({ error: 'Periodo invalido' });
     }
 
     const loja = await lojaModel.getLojaById(lojaId, req.session.contaId);
