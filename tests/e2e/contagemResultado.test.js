@@ -105,8 +105,10 @@ test.describe('Contagem e Resultado do período', () => {
     expect(resultado2.estoqueFinal).toBe(5);
     expect(resultado2.cmvReais).toBe(95); // 0 + 100 - 5
 
-    // Excluir a contagem final: o sistema ainda acha a inicial como aproximação
-    // (é a mais recente <= dataFim), então contagemCompleta continua true.
+    // Excluir a contagem final: só sobra a inicial cobrindo o período inteiro.
+    // Mesma contagem nos dois limites não conta como "completa" (evita
+    // assumir estoque parado o mês inteiro por engano) — cai pro CMV
+    // aproximado, igual a não ter nenhuma contagem no período.
     const deleteRes = await ctx.delete(`/api/contagens/${contagemFinal.id}`, { headers });
     expect(deleteRes.status()).toBe(200);
 
@@ -116,8 +118,8 @@ test.describe('Contagem e Resultado do período', () => {
     const resultadoComFallback = await ctx
       .get(`/api/resultado?lojaId=${loja.id}&dataInicio=${daysAgo(31)}&dataFim=${daysAgo(0)}`)
       .then((r) => r.json());
-    expect(resultadoComFallback.contagemCompleta).toBe(true);
-    expect(resultadoComFallback.estoqueFinal).toBe(0); // reusa a contagem inicial (qtd 0) como final
+    expect(resultadoComFallback.contagemCompleta).toBe(false);
+    expect(resultadoComFallback.cmvPercent).toBe(20); // 100/500*100, igual a sem nenhuma contagem
 
     // Excluir a contagem inicial também: agora não sobra nenhuma contagem
     // no período, cai pro CMV aproximado (compras/faturamento).
