@@ -47,9 +47,30 @@ Acesso: `http://localhost:3000`
 ## Desenvolvimento
 
 - `npm run dev` — servidor com reload
-- `npm test` — testes unitários
+- `npm test` — testes unitários (não toca banco)
+- `npm run test:integration` — testes de integração (Postgres real, schema temporário descartável)
+- `npm run test:e2e` — testes ponta a ponta (Playwright, sobe o servidor de verdade)
 - `npm run test:coverage` — cobertura
-- `npm run migrate:dev -- --dry-run` — verificar migrations
+- `npm run lint` — ESLint
+- `npm run migrate:dev -- --dry-run` — verificar migrations pendentes sem aplicar
+
+## Operação
+
+**CI** (`.github/workflows/ci.yml`): a cada push/PR pra `main` roda lint,
+testes unitários e testes de integração (com Postgres de serviço). Testes
+e2e não entram no CI ainda (precisam de servidor + browser Playwright) —
+rodar localmente com `npm run test:e2e` antes de mergear mudanças
+grandes em auth/fluxos de tela.
+
+**RLS (Row Level Security)**: as tabelas de tenant têm política de acesso
+por `conta_id` no banco (não só filtro na aplicação). Fica inativa até
+`DATABASE_APP_URL` ser configurada apontando pra role `custocheck_app`
+(sem privilégio de dono/superusuário) — ver comentário em
+`.env.example` e `migrations/007_rls_policies.sql`.
+
+**Observabilidade**: `/livez`, `/readyz`, `/healthz` (health checks) e
+`/metrics` (Prometheus, via `prom-client`). Logs estruturados com Pino,
+correlation ID por request.
 
 ## Design
 
@@ -76,23 +97,7 @@ Multi-tenant: **todas as queries filtram por conta_id**.
 - E2E tests (Playwright)
 - Migrations com runner idempotente
 
-❌ **Bloqueado:**
-- Database setup: PostgreSQL auth no Windows (user postgres rejeita senha)
-- Tela de contagem (não foi no escopo)
-- Relatório de perda (não foi no escopo)
-
 ## Setup Alternativo (sem Postgres local)
 
-Para testar a estrutura sem banco:
-
-```bash
-npm install
-# Estrutura está pronta. Controllers existem, rotas montadas.
-# Falta apenas conectar ao banco real.
-```
-
-Ou:
-
-1. **Windows**: Usar WSL2 + Postgres no Linux, ou Docker
-2. **Docker**: `docker run -d -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:17`
-3. **Remote**: Supabase/neon (ajustar DB_SSL=true)
+- **Docker**: `docker run -d -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:17`
+- **Remote**: Supabase/neon (ajustar DB_SSL=true)

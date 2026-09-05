@@ -13,7 +13,8 @@
     "test": "vitest",
     "test:integration": "vitest --config vitest.integration.config.js",
     "test:coverage": "vitest --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "lint": "eslint ."
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -36,9 +37,12 @@
     "sanitize-html": "^2.11.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.40.1",
     "@vitest/coverage-v8": "^1.0.4",
     "cross-env": "^10.1.0",
+    "eslint": "^10.10.0",
+    "globals": "^17.12.0",
     "pino-pretty": "^10.3.1",
     "vitest": "^1.0.4"
   },

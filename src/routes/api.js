@@ -1,5 +1,5 @@
 import express from 'express';
-import { isAuthenticated, hasRole } from '../middleware/auth.js';
+import { isAuthenticated } from '../middleware/auth.js';
 import * as lojaController from '../controllers/lojas.js';
 import * as insumoController from '../controllers/insumos.js';
 import * as compraController from '../controllers/compras.js';
