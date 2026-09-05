@@ -169,11 +169,10 @@ app.get('/resultado', (req, res) => {
   res.render('resultado', { title: 'Resultado do Período', userId: req.session.userId });
 });
 
-// Auth routes (sem CSRF para login/signup públicos)
-app.use('/auth', authRoutes);
-
-// CSRF protection para rotas autenticadas
+// CSRF protection (front-end já envia X-CSRF-Token/_csrf em todo POST de /auth)
 app.use(verifyCsrfToken);
+
+app.use('/auth', authRoutes);
 
 // API routes
 app.use('/api', apiRoutes);

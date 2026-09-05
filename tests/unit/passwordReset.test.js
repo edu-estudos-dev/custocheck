@@ -18,16 +18,29 @@ describe('passwordReset', () => {
   });
 
   it('createResetToken grava o hash do token, não o valor cru', async () => {
-    queryMock.mockResolvedValueOnce({ rows: [] });
+    queryMock.mockResolvedValueOnce({ rows: [] }); // invalida tokens antigos
+    queryMock.mockResolvedValueOnce({ rows: [] }); // insere o novo
 
     const token = await createResetToken(42);
 
     expect(token).toMatch(/^[0-9a-f]{64}$/);
-    const [sql, params] = queryMock.mock.calls[0];
+    const [sql, params] = queryMock.mock.calls[1];
     expect(sql).toMatch(/INSERT INTO password_reset_tokens/);
     expect(params[0]).toBe(42);
     expect(params[1]).toBe(hash(token));
     expect(params[1]).not.toBe(token);
+  });
+
+  it('createResetToken invalida tokens pendentes anteriores do mesmo usuário', async () => {
+    queryMock.mockResolvedValueOnce({ rows: [] });
+    queryMock.mockResolvedValueOnce({ rows: [] });
+
+    await createResetToken(42);
+
+    const [sql, params] = queryMock.mock.calls[0];
+    expect(sql).toMatch(/UPDATE password_reset_tokens SET usado_em/);
+    expect(sql).toMatch(/usado_em IS NULL/);
+    expect(params[0]).toBe(42);
   });
 
   it('consumeResetToken retorna o usuario_id quando o token é válido e não usado', async () => {

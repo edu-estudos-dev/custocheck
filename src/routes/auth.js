@@ -6,8 +6,28 @@ import { withTransaction } from '../config/database.js';
 import { loginLimiter, signupLimiter, passwordResetLimiter } from '../middleware/security.js';
 import { logger } from '../observability/logger.js';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 
 const router = express.Router();
+
+// Troca o ID de sessão antes de autenticar (evita session fixation) e só
+// então grava os dados do usuário na sessão nova. session.regenerate() apaga
+// o csrfToken (era da sessão antiga), então recriamos e resincronizamos o
+// cookie double-submit aqui — senão a próxima requisição falha o CSRF.
+const regenerateSession = (req, res, data) =>
+  new Promise((resolve, reject) => {
+    req.session.regenerate((err) => {
+      if (err) return reject(err);
+      Object.assign(req.session, data);
+      req.session.csrfToken = crypto.randomBytes(32).toString('hex');
+      res.cookie('csrf_token', req.session.csrfToken, {
+        httpOnly: false,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+      });
+      req.session.save((err2) => (err2 ? reject(err2) : resolve()));
+    });
+  });
 
 router.post('/login', loginLimiter, async (req, res) => {
   try {
@@ -29,9 +49,11 @@ router.post('/login', loginLimiter, async (req, res) => {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
 
-    req.session.userId = user.id;
-    req.session.contaId = user.conta_id;
-    req.session.papel = user.papel;
+    await regenerateSession(req, res, {
+      userId: user.id,
+      contaId: user.conta_id,
+      papel: user.papel,
+    });
 
     if (req.accepts('html')) {
       return res.redirect('/dashboard');
@@ -86,9 +108,11 @@ router.post('/signup', signupLimiter, async (req, res) => {
       return { conta, usuario: usuarioRes.rows[0] };
     });
 
-    req.session.userId = resultado.usuario.id;
-    req.session.contaId = resultado.conta.id;
-    req.session.papel = resultado.usuario.papel;
+    await regenerateSession(req, res, {
+      userId: resultado.usuario.id,
+      contaId: resultado.conta.id,
+      papel: resultado.usuario.papel,
+    });
 
     if (req.accepts('html')) {
       return res.redirect('/dashboard');

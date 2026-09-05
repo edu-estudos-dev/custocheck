@@ -10,6 +10,14 @@ export const createResetToken = async (usuarioId) => {
   const tokenHash = hashToken(token);
   const expiraEm = new Date(Date.now() + TOKEN_TTL_MS);
 
+  // Invalida qualquer token pendente anterior do mesmo usuário: só o link
+  // mais recente deve funcionar.
+  await pool.query(
+    `UPDATE password_reset_tokens SET usado_em = CURRENT_TIMESTAMP
+     WHERE usuario_id = $1 AND usado_em IS NULL`,
+    [usuarioId]
+  );
+
   await pool.query(
     `INSERT INTO password_reset_tokens (usuario_id, token_hash, expira_em)
      VALUES ($1, $2, $3)`,

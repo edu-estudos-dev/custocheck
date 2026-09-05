@@ -1,10 +1,12 @@
 import { test, expect } from '@playwright/test';
+import { primeCsrf } from './helpers/csrf.js';
 
 const randomEmail = (label) => `${label}-${Date.now()}-${Math.random().toString(36).slice(2)}@teste.com`;
 
 const signup = async (request, nome, email, senha) => {
+  const csrf = await primeCsrf(request);
   const res = await request.post('/auth/signup', {
-    headers: { Accept: 'application/json' },
+    headers: { Accept: 'application/json', 'X-CSRF-Token': csrf },
     data: { nome, email, senha },
   });
   expect(res.status()).toBe(201);
