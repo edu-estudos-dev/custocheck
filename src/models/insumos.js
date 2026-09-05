@@ -1,7 +1,8 @@
-import pool from '../config/database.js';
+import { tenantQuery } from '../config/database.js';
 
 export const createInsumo = async (contaId, nome, unidadeBase = 'g') => {
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     `INSERT INTO insumos (conta_id, nome, unidade_base)
      VALUES ($1, $2, $3)
      RETURNING id, conta_id, nome, unidade_base, ativo, criado_em`,
@@ -11,7 +12,8 @@ export const createInsumo = async (contaId, nome, unidadeBase = 'g') => {
 };
 
 export const getInsumoById = async (insumoId, contaId) => {
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     'SELECT id, conta_id, nome, unidade_base, ativo, criado_em FROM insumos WHERE id = $1 AND conta_id = $2',
     [insumoId, contaId]
   );
@@ -19,7 +21,8 @@ export const getInsumoById = async (insumoId, contaId) => {
 };
 
 export const listInsumosByContaId = async (contaId) => {
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     `SELECT id, conta_id, nome, unidade_base, ativo, criado_em
      FROM insumos
      WHERE conta_id = $1 AND ativo = true
@@ -31,7 +34,8 @@ export const listInsumosByContaId = async (contaId) => {
 
 export const updateInsumo = async (insumoId, contaId, updates) => {
   const { nome, unidadeBase, ativo } = updates;
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     `UPDATE insumos SET nome = COALESCE($1, nome),
                         unidade_base = COALESCE($2, unidade_base),
                         ativo = COALESCE($3, ativo)
@@ -43,7 +47,8 @@ export const updateInsumo = async (insumoId, contaId, updates) => {
 };
 
 export const createEmbalagem = async (contaId, insumoId, descricao, fatorConversao) => {
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     `INSERT INTO insumo_embalagens (conta_id, insumo_id, descricao, fator_conversao)
      VALUES ($1, $2, $3, $4)
      RETURNING id, conta_id, insumo_id, descricao, fator_conversao, criado_em`,
@@ -53,7 +58,8 @@ export const createEmbalagem = async (contaId, insumoId, descricao, fatorConvers
 };
 
 export const getEmbalagensByInsumoId = async (contaId, insumoId) => {
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     `SELECT id, conta_id, insumo_id, descricao, fator_conversao, criado_em
      FROM insumo_embalagens
      WHERE conta_id = $1 AND insumo_id = $2
@@ -64,7 +70,8 @@ export const getEmbalagensByInsumoId = async (contaId, insumoId) => {
 };
 
 export const getEmbalagemById = async (contaId, embalagemId) => {
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     'SELECT id, conta_id, insumo_id, descricao, fator_conversao, criado_em FROM insumo_embalagens WHERE id = $1 AND conta_id = $2',
     [embalagemId, contaId]
   );

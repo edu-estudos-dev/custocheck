@@ -1,7 +1,7 @@
-import pool, { withTransaction } from '../config/database.js';
+import { tenantQuery, tenantTransaction } from '../config/database.js';
 
 export const createContagem = async (contaId, lojaId, dataReferencia, criadoPor, itens) => {
-  return withTransaction(async (client) => {
+  return tenantTransaction(contaId, async (client) => {
     const contagemRes = await client.query(
       `INSERT INTO contagens (conta_id, loja_id, data_referencia, status, criado_por)
        VALUES ($1, $2, $3, 'fechada', $4)
@@ -22,7 +22,7 @@ export const createContagem = async (contaId, lojaId, dataReferencia, criadoPor,
 };
 
 export const updateContagem = async (contagemId, contaId, dataReferencia, itens) => {
-  return withTransaction(async (client) => {
+  return tenantTransaction(contaId, async (client) => {
     const contagemRes = await client.query(
       `UPDATE contagens SET data_referencia = $1
        WHERE id = $2 AND conta_id = $3
@@ -46,7 +46,8 @@ export const updateContagem = async (contagemId, contaId, dataReferencia, itens)
 };
 
 export const deleteContagem = async (contagemId, contaId) => {
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     'DELETE FROM contagens WHERE id = $1 AND conta_id = $2 RETURNING id',
     [contagemId, contaId]
   );
@@ -54,7 +55,8 @@ export const deleteContagem = async (contagemId, contaId) => {
 };
 
 export const listContagensByLoja = async (lojaId, contaId) => {
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     `SELECT id, conta_id, loja_id, data_referencia, status, criado_em
      FROM contagens
      WHERE loja_id = $1 AND conta_id = $2
@@ -65,41 +67,45 @@ export const listContagensByLoja = async (lojaId, contaId) => {
 };
 
 export const getContagemComItens = async (contagemId, contaId) => {
-  const contagemRes = await pool.query(
-    `SELECT id, conta_id, loja_id, data_referencia, status, criado_em
-     FROM contagens WHERE id = $1 AND conta_id = $2`,
-    [contagemId, contaId]
-  );
-  const contagem = contagemRes.rows[0];
-  if (!contagem) return null;
+  return tenantTransaction(contaId, async (client) => {
+    const contagemRes = await client.query(
+      `SELECT id, conta_id, loja_id, data_referencia, status, criado_em
+       FROM contagens WHERE id = $1 AND conta_id = $2`,
+      [contagemId, contaId]
+    );
+    const contagem = contagemRes.rows[0];
+    if (!contagem) return null;
 
-  const itensRes = await pool.query(
-    `SELECT ci.insumo_id, ci.qtd_base, i.nome as insumo_nome, i.unidade_base
-     FROM contagem_itens ci
-     JOIN insumos i ON i.id = ci.insumo_id
-     WHERE ci.contagem_id = $1
-     ORDER BY i.nome ASC`,
-    [contagemId]
-  );
+    const itensRes = await client.query(
+      `SELECT ci.insumo_id, ci.qtd_base, i.nome as insumo_nome, i.unidade_base
+       FROM contagem_itens ci
+       JOIN insumos i ON i.id = ci.insumo_id
+       WHERE ci.contagem_id = $1
+       ORDER BY i.nome ASC`,
+      [contagemId]
+    );
 
-  return { ...contagem, itens: itensRes.rows };
+    return { ...contagem, itens: itensRes.rows };
+  });
 };
 
 // Última contagem da loja com data_referencia <= dataLimite (ou a mais próxima antes dela).
 export const getUltimaContagemAte = async (lojaId, contaId, dataLimite) => {
-  const contagemRes = await pool.query(
-    `SELECT id, data_referencia FROM contagens
-     WHERE loja_id = $1 AND conta_id = $2 AND data_referencia <= $3
-     ORDER BY data_referencia DESC LIMIT 1`,
-    [lojaId, contaId, dataLimite]
-  );
-  const contagem = contagemRes.rows[0];
-  if (!contagem) return null;
+  return tenantTransaction(contaId, async (client) => {
+    const contagemRes = await client.query(
+      `SELECT id, data_referencia FROM contagens
+       WHERE loja_id = $1 AND conta_id = $2 AND data_referencia <= $3
+       ORDER BY data_referencia DESC LIMIT 1`,
+      [lojaId, contaId, dataLimite]
+    );
+    const contagem = contagemRes.rows[0];
+    if (!contagem) return null;
 
-  const itensRes = await pool.query(
-    `SELECT insumo_id, qtd_base FROM contagem_itens WHERE contagem_id = $1`,
-    [contagem.id]
-  );
+    const itensRes = await client.query(
+      `SELECT insumo_id, qtd_base FROM contagem_itens WHERE contagem_id = $1`,
+      [contagem.id]
+    );
 
-  return { ...contagem, itens: itensRes.rows };
+    return { ...contagem, itens: itensRes.rows };
+  });
 };
