@@ -7,6 +7,6 @@ export default defineConfig({
     testTimeout: 10000,
     // tests/e2e roda no Playwright (`npm run test:e2e`), não no vitest
     // tests/integration roda via `npm run test:integration` (conecta no PostgreSQL)
-    exclude: ['**/node_modules/**', '**/dist/**', 'tests/e2e/**', 'tests/integration/**'],
+    exclude: ['**/node_modules/**', '**/dist/**', '.worktrees/**', 'tests/e2e/**', 'tests/integration/**'],
   },
 });
