@@ -38,7 +38,13 @@ app.use(methodOverride('_method'));
 let sessionStore;
 if (process.env.REDIS_URL && process.env.NODE_ENV === 'production') {
   const redisClient = redis.createClient({ url: process.env.REDIS_URL });
-  redisClient.connect();
+  // node-redis derruba o processo inteiro num 'error' sem listener (padrão
+  // do EventEmitter do Node) — sem isso, qualquer soluço de rede no Redis
+  // crasha a aplicação inteira, não só a sessão.
+  redisClient.on('error', (err) => {
+    console.error('Redis client error:', err);
+  });
+  await redisClient.connect();
   sessionStore = new RedisStore({ client: redisClient });
 } else {
   const { MemoryStore } = await import('express-session');
