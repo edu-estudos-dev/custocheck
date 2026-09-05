@@ -15,7 +15,12 @@ const createSchemaTable = async (client) => {
   `);
 };
 
+// Lê o histórico sem criar nada: dry-run precisa ser leitura pura. Se a
+// tabela de controle ainda não existe, não há nenhuma migration aplicada.
 const getAppliedMigrations = async (client) => {
+  const exists = await client.query(`SELECT to_regclass('public.schema_migrations') AS t`);
+  if (!exists.rows[0].t) return [];
+
   const result = await client.query('SELECT filename FROM schema_migrations');
   return result.rows.map(r => r.filename);
 };
@@ -53,8 +58,6 @@ const main = async () => {
 
   const client = await pool.connect();
   try {
-    await createSchemaTable(client);
-
     const applied = await getAppliedMigrations(client);
     const all = getMigrationFiles();
     const pending = all.filter(f => !applied.includes(f));
@@ -72,6 +75,7 @@ const main = async () => {
       return;
     }
 
+    await createSchemaTable(client);
     await client.query('BEGIN');
 
     for (const filename of pending) {
