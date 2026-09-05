@@ -1,7 +1,8 @@
-import pool from '../config/database.js';
+import { tenantQuery } from '../config/database.js';
 
 export const createVendaPeriodo = async (contaId, lojaId, dataInicio, dataFim, faturamento) => {
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     `INSERT INTO vendas_periodo (conta_id, loja_id, data_inicio, data_fim, faturamento)
      VALUES ($1, $2, $3, $4, $5)
      ON CONFLICT DO NOTHING
@@ -12,7 +13,8 @@ export const createVendaPeriodo = async (contaId, lojaId, dataInicio, dataFim, f
 };
 
 export const getVendaPeriodo = async (lojaId, contaId, dataInicio, dataFim) => {
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     `SELECT id, conta_id, loja_id, data_inicio, data_fim, faturamento, criado_em
      FROM vendas_periodo
      WHERE conta_id = $1 AND loja_id = $2 AND data_inicio = $3 AND data_fim = $4`,
@@ -22,7 +24,8 @@ export const getVendaPeriodo = async (lojaId, contaId, dataInicio, dataFim) => {
 };
 
 export const listVendasByLojaId = async (lojaId, contaId) => {
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     `SELECT id, conta_id, loja_id, data_inicio, data_fim, faturamento, criado_em
      FROM vendas_periodo
      WHERE conta_id = $1 AND loja_id = $2
@@ -34,7 +37,8 @@ export const listVendasByLojaId = async (lojaId, contaId) => {
 
 export const updateVendaPeriodo = async (vendaId, contaId, updates) => {
   const { faturamento } = updates;
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     `UPDATE vendas_periodo SET faturamento = COALESCE($1, faturamento)
      WHERE id = $2 AND conta_id = $3
      RETURNING id, conta_id, loja_id, data_inicio, data_fim, faturamento, criado_em`,

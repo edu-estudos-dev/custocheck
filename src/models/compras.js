@@ -1,4 +1,4 @@
-import pool from '../config/database.js';
+import { tenantQuery } from '../config/database.js';
 
 export const createCompra = async (
   contaId,
@@ -10,7 +10,8 @@ export const createCompra = async (
   fornecedor = null,
   dataCompra = null
 ) => {
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     `INSERT INTO compras (conta_id, loja_id, insumo_id, embalagem_id, qtd_embalagens, valor_total, fornecedor, data_compra)
      VALUES ($1, $2, $3, $4, $5, $6, $7, COALESCE($8, CURRENT_DATE))
      RETURNING id, conta_id, loja_id, insumo_id, embalagem_id, qtd_embalagens, valor_total, fornecedor, data_compra, criado_em`,
@@ -20,7 +21,8 @@ export const createCompra = async (
 };
 
 export const getCompraById = async (compraId, contaId) => {
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     `SELECT id, conta_id, loja_id, insumo_id, embalagem_id, qtd_embalagens, valor_total, fornecedor, data_compra, criado_em
      FROM compras
      WHERE id = $1 AND conta_id = $2`,
@@ -54,6 +56,6 @@ export const listComprasByLojaId = async (lojaId, contaId, dataInicio = null, da
 
   query += ' ORDER BY c.data_compra DESC';
 
-  const result = await pool.query(query, params);
+  const result = await tenantQuery(contaId, query, params);
   return result.rows;
 };

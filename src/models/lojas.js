@@ -1,7 +1,8 @@
-import pool from '../config/database.js';
+import { tenantQuery } from '../config/database.js';
 
 export const createLoja = async (contaId, nome, cidade = null) => {
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     `INSERT INTO lojas (conta_id, nome, cidade)
      VALUES ($1, $2, $3)
      RETURNING id, conta_id, nome, cidade, ativo, criado_em`,
@@ -11,7 +12,8 @@ export const createLoja = async (contaId, nome, cidade = null) => {
 };
 
 export const getLojaById = async (lojaId, contaId) => {
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     'SELECT id, conta_id, nome, cidade, ativo, criado_em FROM lojas WHERE id = $1 AND conta_id = $2',
     [lojaId, contaId]
   );
@@ -19,7 +21,8 @@ export const getLojaById = async (lojaId, contaId) => {
 };
 
 export const listLojasByContaId = async (contaId) => {
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     `SELECT id, conta_id, nome, cidade, ativo, criado_em
      FROM lojas
      WHERE conta_id = $1 AND ativo = true
@@ -31,7 +34,8 @@ export const listLojasByContaId = async (contaId) => {
 
 export const updateLoja = async (lojaId, contaId, updates) => {
   const { nome, cidade, ativo } = updates;
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     `UPDATE lojas SET nome = COALESCE($1, nome),
                       cidade = COALESCE($2, cidade),
                       ativo = COALESCE($3, ativo)
@@ -43,7 +47,8 @@ export const updateLoja = async (lojaId, contaId, updates) => {
 };
 
 export const deleteLoja = async (lojaId, contaId) => {
-  const result = await pool.query(
+  const result = await tenantQuery(
+    contaId,
     'DELETE FROM lojas WHERE id = $1 AND conta_id = $2 RETURNING id',
     [lojaId, contaId]
   );

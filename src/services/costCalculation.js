@@ -1,4 +1,4 @@
-import pool from '../config/database.js';
+import { tenantQuery } from '../config/database.js';
 import { roundMoney } from '../utilities/money.js';
 import * as contagemModel from '../models/contagens.js';
 
@@ -25,7 +25,7 @@ export const calculateWeightedAverageCost = async (contaId, insumoId, dataInicio
     query += ` AND c.data_compra <= $${params.length}`;
   }
 
-  const result = await pool.query(query, params);
+  const result = await tenantQuery(contaId, query, params);
   const row = result.rows[0];
 
   if (!row || !row.qtd_base_total) {
@@ -44,7 +44,8 @@ export const calculateWeightedAverageCost = async (contaId, insumoId, dataInicio
 };
 
 export const calculateCMVPercent = async (contaId, lojaId, dataInicio, dataFim) => {
-  const vendaResult = await pool.query(
+  const vendaResult = await tenantQuery(
+    contaId,
     `SELECT SUM(faturamento) as faturamento_total
      FROM vendas_periodo
      WHERE conta_id = $1 AND loja_id = $2
@@ -57,7 +58,8 @@ export const calculateCMVPercent = async (contaId, lojaId, dataInicio, dataFim) 
     return 0;
   }
 
-  const compraResult = await pool.query(
+  const compraResult = await tenantQuery(
+    contaId,
     `SELECT SUM(valor_total) as custo_total
      FROM compras
      WHERE conta_id = $1 AND loja_id = $2
@@ -90,13 +92,15 @@ const calcularValorEstoque = async (contaId, contagem) => {
 // (compras / faturamento) e sinaliza que o resultado não é preciso.
 export const calculateResultadoPeriodo = async (contaId, lojaId, dataInicio, dataFim) => {
   const [vendaResult, compraResult, contagemInicial, contagemFinal] = await Promise.all([
-    pool.query(
+    tenantQuery(
+      contaId,
       `SELECT SUM(faturamento) as faturamento_total
        FROM vendas_periodo
        WHERE conta_id = $1 AND loja_id = $2 AND data_inicio >= $3 AND data_fim <= $4`,
       [contaId, lojaId, dataInicio, dataFim]
     ),
-    pool.query(
+    tenantQuery(
+      contaId,
       `SELECT SUM(valor_total) as custo_total
        FROM compras
        WHERE conta_id = $1 AND loja_id = $2 AND data_compra >= $3 AND data_compra <= $4`,

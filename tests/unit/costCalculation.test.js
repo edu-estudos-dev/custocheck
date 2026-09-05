@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const queryMock = vi.fn();
 vi.mock('../../src/config/database.js', () => ({
   default: { query: (...args) => queryMock(...args) },
+  tenantQuery: (contaId, text, params) => queryMock(text, params),
 }));
 
 const getUltimaContagemAteMock = vi.fn();
