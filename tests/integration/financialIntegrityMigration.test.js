@@ -1,8 +1,11 @@
 import { randomBytes } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import * as dotenv from 'dotenv';
 import pg from 'pg';
 import { describe, expect, it } from 'vitest';
+
+dotenv.config();
 
 const { Client } = pg;
 const SAFE_SCHEMA_NAME = /^custocheck_block1_[0-9a-f]+$/;
