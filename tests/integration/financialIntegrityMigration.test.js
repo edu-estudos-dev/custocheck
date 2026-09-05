@@ -198,10 +198,9 @@ describe('006_financial_integrity.sql', () => {
 
       try {
         if (schemaCreated) {
-          if (!SAFE_SCHEMA_NAME.test(schemaName)) {
-            throw new Error(`Refusing to drop unsafe test schema: ${schemaName}`);
-          }
-
+          // schemaName já foi validado contra SAFE_SCHEMA_NAME antes de
+          // qualquer conexão (é const, nunca muda) — sem checar de novo
+          // aqui dentro do finally (no-unsafe-finally).
           await client.query(`DROP SCHEMA "${schemaName}" CASCADE`);
           const remaining = await client.query(
             'SELECT count(*) FROM pg_namespace WHERE nspname = $1',
