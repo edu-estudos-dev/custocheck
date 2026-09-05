@@ -10,6 +10,11 @@ if (!connectionString) {
   throw new Error('DATABASE_URL not defined');
 }
 
+// Timezone via opção de conexão (o Postgres aplica antes da 1ª query) em
+// vez de rodar "SET TIME ZONE" no evento 'connect': esse evento é
+// fire-and-forget — o pool pode entregar o client pra próxima query antes
+// da SET terminar, gerando "client.query() called while already
+// executing" (aviso de depreciação do pg, remoção em pg@9).
 const pool = new Pool({
   connectionString,
   max: parseInt(process.env.DATABASE_POOL_MAX || '6', 10),
@@ -17,10 +22,7 @@ const pool = new Pool({
   connectionTimeoutMillis: parseInt(process.env.DATABASE_CONNECTION_TIMEOUT_MS || '10000', 10),
   ssl: process.env.DB_SSL === 'false' ? false : { rejectUnauthorized: process.env.NODE_ENV === 'production' },
   application_name: 'custocheck',
-});
-
-pool.on('connect', (client) => {
-  client.query("SET TIME ZONE 'America/Fortaleza'");
+  options: '-c timezone=America/Fortaleza',
 });
 
 pool.on('error', (err) => {
@@ -41,12 +43,10 @@ const appPool = appConnectionString === connectionString
       connectionTimeoutMillis: parseInt(process.env.DATABASE_CONNECTION_TIMEOUT_MS || '10000', 10),
       ssl: process.env.DB_SSL === 'false' ? false : { rejectUnauthorized: process.env.NODE_ENV === 'production' },
       application_name: 'custocheck-app-role',
+      options: '-c timezone=America/Fortaleza',
     });
 
 if (appPool !== pool) {
-  appPool.on('connect', (client) => {
-    client.query("SET TIME ZONE 'America/Fortaleza'");
-  });
   appPool.on('error', (err) => {
     console.error('Unexpected error on idle client (app pool)', err);
   });
