@@ -15,6 +15,7 @@ export const logger = process.env.NODE_ENV === 'production'
         colorize: true,
         translateTime: 'SYS:standard',
         ignore: 'pid,hostname',
+        singleLine: true,
       })
     );
 
